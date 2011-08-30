@@ -1,14 +1,18 @@
 Notes about this source code
 
+
 = Introduction =
 
 Metadrone itself is a closed source application, however these components are open and publicly accessible for open source licensing reasons.
+
+
 
 = Details =
 
 *ICSharpCode.TextEditor*
 
 A derived work from the ICSharpCode text editor component of the SharpDevelop project. This component has been modified for use with Metadrone.
+
 
 *SourcePlugins*
 
