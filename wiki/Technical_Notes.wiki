@@ -13,5 +13,7 @@ A derived work from the ICSharpCode text editor component of the SharpDevelop pr
 *SourcePlugins*
 
 These plugins are for databases that are not natively supported by the .Net framework (such as SQL Server for instance).
+
 Most database vendors provide libraries under the LGPL license, however the MySql library (mysql.data.dll) is under the GPL license and therefore any component making use of these assemblies must be open source.
+
 You can refer to this code to create your own plugins for additional database support.
