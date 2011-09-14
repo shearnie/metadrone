@@ -1,0 +1,631 @@
+<?xml version="1.0"?>
+<MDProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="www.metadrone.com.angry.army.1.0">
+  <Name>SQL_CRUDs</Name>
+  <Profile>
+    <OpenEditorGUIDs>
+      <string>91d04652-4296-4611-95a2-a80423a4d166</string>
+      <string>8d30bbc6-3027-439c-9d96-08f956a28e82</string>
+      <string>0f370b49-a784-4c8e-bce3-2fb79de5020b</string>
+      <string>0cb0c554-91d9-40bd-84cc-431a9809381a</string>
+    </OpenEditorGUIDs>
+    <SelectedEditorGUID>0cb0c554-91d9-40bd-84cc-431a9809381a</SelectedEditorGUID>
+  </Profile>
+  <Properties>
+    <EditorGUID>91d04652-4296-4611-95a2-a80423a4d166</EditorGUID>
+    <BeginTag>&lt;&lt;!</BeginTag>
+    <EndTag>!&gt;&gt;</EndTag>
+    <SuperMain>call SQL_CRUDs</SuperMain>
+  </Properties>
+  <Folders />
+  <Sources>
+    <Source>
+      <Name>SQL_Server</Name>
+      <Provider>SQLServer</Provider>
+      <ConnectionString />
+      <SchemaQuery>SELECT DISTINCT 
+    INFORMATION_SCHEMA.TABLES.TABLE_NAME                AS TABLE_NAME,
+    INFORMATION_SCHEMA.TABLES.TABLE_TYPE                AS TABLE_TYPE,
+    INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME              AS COLUMN_NAME, 
+    INFORMATION_SCHEMA.COLUMNS.DATA_TYPE                AS DATA_TYPE, 
+    INFORMATION_SCHEMA.COLUMNS.ORDINAL_POSITION         AS ORDINAL_POSITION, 
+    INFORMATION_SCHEMA.COLUMNS.CHARACTER_MAXIMUM_LENGTH AS CHARACTER_MAXIMUM_LENGTH, 
+    INFORMATION_SCHEMA.COLUMNS.NUMERIC_PRECISION        AS NUMERIC_PRECISION, 
+    INFORMATION_SCHEMA.COLUMNS.NUMERIC_SCALE            AS NUMERIC_SCALE, 
+    INFORMATION_SCHEMA.COLUMNS.IS_NULLABLE              AS IS_NULLABLE, 
+    CASE WHEN 
+		ISNULL(ColumnProperty(Object_ID(QuoteName(KEY_COLUMN_USAGE.TABLE_SCHEMA) + '.' + QuoteName(KEY_COLUMN_USAGE.TABLE_NAME)), 
+												  KEY_COLUMN_USAGE.COLUMN_NAME, 'IsIdentity'), 0) = 1 THEN 
+		1
+	ELSE 
+		(SELECT TOP 1 
+			C.IS_IDENTITY 
+		 FROM 
+			SYS.OBJECTS O 
+		 INNER JOIN 
+			SYS.COLUMNS C ON O.OBJECT_ID = C.OBJECT_ID 
+		 WHERE 
+			O.TYPE = 'U' 
+		 AND 
+			O.NAME = INFORMATION_SCHEMA.COLUMNS.TABLE_NAME
+		AND
+			C.NAME = INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME)
+	END 
+                                                        AS IS_IDENTITY, 
+    (SELECT TOP 1 INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE 
+     FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+     INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ON INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.TABLE_NAME = INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME 
+     AND INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.CONSTRAINT_NAME = INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME 
+     WHERE INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME = INFORMATION_SCHEMA.COLUMNS.TABLE_NAME 
+     AND INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.COLUMN_NAME = INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME
+     AND INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE IN ('PRIMARY KEY', 'FOREIGN KEY')) 
+                                                        AS CONSTRAINT_TYPE 
+FROM 
+    INFORMATION_SCHEMA.TABLES 
+LEFT JOIN 
+    INFORMATION_SCHEMA.COLUMNS ON INFORMATION_SCHEMA.COLUMNS.TABLE_NAME = INFORMATION_SCHEMA.TABLES.TABLE_NAME
+LEFT JOIN 
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE ON INFORMATION_SCHEMA.KEY_COLUMN_USAGE.TABLE_NAME = INFORMATION_SCHEMA.COLUMNS.TABLE_NAME 
+    AND 
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE.COLUMN_NAME = INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME 
+WHERE 
+    INFORMATION_SCHEMA.TABLES.TABLE_NAME &lt;&gt; 'sysdiagrams' 
+AND 
+    INFORMATION_SCHEMA.TABLES.TABLE_NAME &lt;&gt; 'sysmessages' 
+AND 
+    INFORMATION_SCHEMA.TABLES.TABLE_NAME &lt;&gt; 'sysobjects' 
+ORDER BY 
+    INFORMATION_SCHEMA.TABLES.TABLE_NAME, 
+    INFORMATION_SCHEMA.COLUMNS.ORDINAL_POSITION
+</SchemaQuery>
+      <TableSchemaQuery />
+      <ColumnSchemaQuery />
+      <TableNamePlaceHolder />
+      <RoutineSchemaQuery>SELECT
+	INFORMATION_SCHEMA.ROUTINES.ROUTINE_NAME				AS ROUTINE_NAME,
+	INFORMATION_SCHEMA.ROUTINES.ROUTINE_TYPE				AS ROUTINE_TYPE,
+	INFORMATION_SCHEMA.PARAMETERS.PARAMETER_NAME			AS PARAMETER_NAME,
+	INFORMATION_SCHEMA.PARAMETERS.PARAMETER_MODE			AS PARAMETER_MODE,
+	INFORMATION_SCHEMA.PARAMETERS.DATA_TYPE					AS DATA_TYPE,
+	INFORMATION_SCHEMA.PARAMETERS.ORDINAL_POSITION			AS ORDINAL_POSITION,
+	INFORMATION_SCHEMA.PARAMETERS.CHARACTER_MAXIMUM_LENGTH	AS CHARACTER_MAXIMUM_LENGTH,
+	INFORMATION_SCHEMA.PARAMETERS.NUMERIC_PRECISION			AS NUMERIC_PRECISION,
+	INFORMATION_SCHEMA.PARAMETERS.NUMERIC_SCALE				AS NUMERIC_SCALE
+FROM
+	INFORMATION_SCHEMA.ROUTINES 
+LEFT JOIN
+	INFORMATION_SCHEMA.PARAMETERS ON INFORMATION_SCHEMA.PARAMETERS.SPECIFIC_NAME = INFORMATION_SCHEMA.ROUTINES.SPECIFIC_NAME
+WHERE
+    ObjectProperty (Object_Id (INFORMATION_SCHEMA.ROUTINES.ROUTINE_NAME), 'IsMSShipped') = 0 AND
+    (SELECT
+		major_id 
+	 FROM
+		SYS.EXTENDED_PROPERTIES
+	 WHERE
+		major_id = object_id(INFORMATION_SCHEMA.ROUTINES.ROUTINE_NAME)
+	 AND
+		minor_id = 0
+	 AND
+		class = 1
+	AND
+		name = N'microsoft_database_tools_support'
+    ) IS NULL
+ORDER BY
+	INFORMATION_SCHEMA.ROUTINES.SPECIFIC_NAME,
+	INFORMATION_SCHEMA.PARAMETERS.ORDINAL_POSITION
+</RoutineSchemaQuery>
+      <Transformations>//Set column property values
+set table.lastpos = table.listpos = table.listcount
+set column.lastpos = column.listpos = column.listcount
+set column.sqltype = column.datatype
+set column.sqltypefullspec = column.datatype
+
+if column.datatype = "bit"
+	set column.vbtype = "Boolean"
+	set column.cstype = "bool"
+	set column.vbdefval = "False"
+	set column.csdefval = "false"
+	
+elseif column.datatype = "int" or column.datatype = "int identity"
+	set column.vbtype = "Integer"
+	set column.cstype = "int"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "bigint" or column.datatype = "bigint identity"
+	set column.vbtype = "Int64"
+	set column.cstype = "int"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "smallint" or column.datatype = "smallint identity"
+	set column.vbtype = "Int16"
+	set column.cstype = "int"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "tinyint"
+	set column.vbtype = "Byte"
+	set column.cstype = "byte"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	
+elseif column.datatype = "varchar"
+	set column.vbtype = "String"
+	set column.cstype = "string"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	if column.length = -1
+		set column.sqltypefullspec = column.datatype + "(max)"
+	else
+		set column.sqltypefullspec = column.datatype + "(" + column.length + ")"
+	end
+	
+elseif column.datatype = "nvarchar"
+	set column.vbtype = "String"
+	set column.cstype = "string"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	if column.length = -1
+		set column.sqltypefullspec = column.datatype + "(max)"
+	else
+		set column.sqltypefullspec = column.datatype + "(" + column.length + ")"
+	end
+	
+elseif column.datatype = "text" or column.datatype = "ntext" or column.datatype = "xml" or column.datatype = "sysname"
+	set column.vbtype = "String"
+	set column.cstype = "string"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	
+elseif column.datatype = "char" or column.datatype = "nchar"
+	set column.vbtype = "String"
+	set column.cstype = "string"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	set column.sqltypefullspec = column.datatype + "(" + column.length + ")"
+	
+elseif column.datatype = "decimal" or column.datatype = "numeric"
+	set column.vbtype = "Decimal"
+	set column.cstype = "decimal"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	set column.sqltypefullspec = column.datatype + "(" + column.precision + "," + column.scale + ")"
+	
+elseif column.datatype = "float"
+	set column.vbtype = "Double"
+	set column.cstype = "double"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "real"
+	set column.vbtype = "Single"
+	set column.cstype = "float"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "money" or column.datatype = "smallmoney"
+	set column.vbtype = "Decimal"
+	set column.cstype = "decimal"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "datetime" or column.datatype = "smalldatetime" or column.datatype = "timestamp"
+	set column.vbtype = "DateTime"
+	set column.cstype = "DateTime"
+	set column.vbdefval = "System.DateTime.Now"
+	set column.csdefval = "System.DateTime.Now"
+	
+elseif column.datatype = "binary" or column.datatype = "image"
+	set column.vbtype = "Byte()"
+	set column.cstype = "byte[]"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	set column.sqltypefullspec = column.datatype + "(" + column.length + ")"
+	
+elseif column.datatype = "varbinary"
+	set column.vbtype = "Byte()"
+	set column.cstype = "byte[]"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	if column.length = -1
+		set column.sqltypefullspec = column.datatype + "(max)"
+	else
+		set column.sqltypefullspec = column.datatype + "(" + column.length + ")"
+	end
+	
+elseif column.datatype = "sql_variant"
+	set column.vbtype = "Object"
+	set column.cstype = "object"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	
+elseif column.datatype = "uniqueidentifier"
+	set column.vbtype = "Guid"
+	set column.cstype = "Guid"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	
+else
+	set column.vbtype = column.datatype
+	set column.cstype = column.datatype
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	
+end
+
+
+
+
+//Set parameter property values
+set routine.lastpos = routine.listpos = routine.listcount
+set param.lastpos = column.listpos = column.listcount
+set param.sqltype = param.datatype
+set param.sqltypefullspec = param.datatype
+
+if param.datatype = "bit"
+	set param.vbtype = "Boolean"
+	set param.cstype = "bool"
+	set param.vbdefval = "False"
+	set param.csdefval = "false"
+	
+elseif param.datatype = "int" or param.datatype = "int identity"
+	set param.vbtype = "Integer"
+	set param.cstype = "int"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "bigint" or param.datatype = "bigint identity"
+	set param.vbtype = "Int64"
+	set param.cstype = "int"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "smallint" or param.datatype = "smallint identity"
+	set param.vbtype = "Int16"
+	set param.cstype = "int"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "tinyint"
+	set param.vbtype = "Byte"
+	set param.cstype = "byte"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	
+elseif param.datatype = "varchar"
+	set param.vbtype = "String"
+	set param.cstype = "string"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	if param.length = -1
+		set param.sqltypefullspec = param.datatype + "(max)"
+	else
+		set param.sqltypefullspec = param.datatype + "(" + param.length + ")"
+	end
+	
+elseif param.datatype = "nvarchar"
+	set param.vbtype = "String"
+	set param.cstype = "string"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	if param.length = -1
+		set param.sqltypefullspec = param.datatype + "(max)"
+	else
+		set param.sqltypefullspec = param.datatype + "(" + param.length + ")"
+	end
+	
+elseif param.datatype = "text" or param.datatype = "ntext" or param.datatype = "xml" or param.datatype = "sysname"
+	set param.vbtype = "String"
+	set param.cstype = "string"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	
+elseif param.datatype = "char" or param.datatype = "nchar"
+	set param.vbtype = "String"
+	set param.cstype = "string"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	set param.sqltypefullspec = param.datatype + "(" + param.length + ")"
+	
+elseif param.datatype = "decimal" or param.datatype = "numeric"
+	set param.vbtype = "Decimal"
+	set param.cstype = "decimal"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	set param.sqltypefullspec = param.datatype + "(" + param.precision + "," + param.scale + ")"
+	
+elseif param.datatype = "float"
+	set param.vbtype = "Double"
+	set param.cstype = "double"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "real"
+	set param.vbtype = "Single"
+	set param.cstype = "float"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "money" or param.datatype = "smallmoney"
+	set param.vbtype = "Decimal"
+	set param.cstype = "decimal"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "datetime" or param.datatype = "smalldatetime" or param.datatype = "timestamp"
+	set param.vbtype = "DateTime"
+	set param.cstype = "DateTime"
+	set param.vbdefval = "System.DateTime.Now"
+	set param.csdefval = "System.DateTime.Now"
+	
+elseif param.datatype = "binary" or param.datatype = "image"
+	set param.vbtype = "Byte()"
+	set param.cstype = "byte[]"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	set param.sqltypefullspec = param.datatype + "(" + param.length + ")"
+	
+elseif param.datatype = "varbinary"
+	set param.vbtype = "Byte()"
+	set param.cstype = "byte[]"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	if param.length = -1
+		set param.sqltypefullspec = param.datatype + "(max)"
+	else
+		set param.sqltypefullspec = param.datatype + "(" + param.length + ")"
+	end
+	
+elseif param.datatype = "sql_variant"
+	set param.vbtype = "Object"
+	set param.cstype = "object"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	
+elseif param.datatype = "uniqueidentifier"
+	set param.vbtype = "Guid"
+	set param.cstype = "Guid"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	
+else
+	set param.vbtype = param.datatype
+	set param.cstype = param.datatype
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	
+end
+</Transformations>
+      <EditorGUID>0cb0c554-91d9-40bd-84cc-431a9809381a</EditorGUID>
+    </Source>
+  </Sources>
+  <Packages>
+    <MDPackage>
+      <TagVal>
+        <GUID>ba9448a0-9acb-4a9a-85ae-c1b8aa8c0055</GUID>
+      </TagVal>
+      <Name>SQL_CRUDs</Name>
+      <Main>
+        <EditorGUID>8d30bbc6-3027-439c-9d96-08f956a28e82</EditorGUID>
+        <OwnerGUID>ba9448a0-9acb-4a9a-85ae-c1b8aa8c0055</OwnerGUID>
+        <Text>#safebegin = "' safe start"
+#safeend = "' safe end"
+//**** Preprocessors ******
+#ignorecase on  // case sensitivity of string comparisons
+
+call CRUDs(sources.SQL_Server)
+</Text>
+      </Main>
+      <Folders />
+      <Templates>
+        <Template>
+          <Name>CRUDs</Name>
+          <EditorGUID>0f370b49-a784-4c8e-bce3-2fb79de5020b</EditorGUID>
+          <OwnerGUID>ba9448a0-9acb-4a9a-85ae-c1b8aa8c0055</OwnerGUID>
+          <Text>&lt;&lt;!header
+    is CRUDs(conn)
+    return "TableCRUDs.sql"
+end!&gt;&gt;
+&lt;&lt;!for table tbl in conn!&gt;&gt;
+
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[&lt;&lt;!tbl!&gt;&gt;Get]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[&lt;&lt;!tbl!&gt;&gt;Get]
+
+GO
+CREATE PROCEDURE dbo.&lt;&lt;!tbl!&gt;&gt;Get
+&lt;&lt;!if tbl.pkcolumncount &gt; 0!&gt;&gt;
+(
+&lt;&lt;!for pkcolumn col in tbl!&gt;&gt;
+  @&lt;&lt;!col.replace(" ","_")!&gt;&gt; &lt;&lt;!col.sqltypefullspec!&gt;&gt; = NULL&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;,&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+)
+&lt;&lt;!end!&gt;&gt;
+AS BEGIN
+
+SET NOCOUNT ON
+
+DECLARE @returnCode int
+SET @returnCode = 0
+
+&lt;&lt;!if tbl.pkcolumncount &gt; 0!&gt;&gt;
+IF &lt;&lt;!for pkcolumn col in tbl!&gt;&gt;
+&lt;&lt;!if col.sqltype = "int"!&gt;&gt;
+ISNULL(@&lt;&lt;!col.replace(" ","_")!&gt;&gt;, 0) &lt; 1 &lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;AND&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!else!&gt;&gt;
+@&lt;&lt;!col.replace(" ","_")!&gt;&gt; IS NULL &lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;AND&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+    SELECT
+&lt;&lt;!for column col in tbl!&gt;&gt;
+        [&lt;&lt;!col!&gt;&gt;]&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;,&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+    FROM
+        [&lt;&lt;!tbl!&gt;&gt;]
+&lt;&lt;!if tbl.pkcolumncount &gt; 0!&gt;&gt;
+ELSE
+    SELECT
+&lt;&lt;!for column col in tbl!&gt;&gt;
+        [&lt;&lt;!col!&gt;&gt;]&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;,&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+    FROM
+        [&lt;&lt;!tbl!&gt;&gt;]
+    WHERE
+&lt;&lt;!for pkcolumn col in tbl!&gt;&gt;
+        [&lt;&lt;!col!&gt;&gt;] = @&lt;&lt;!col.replace(" ","_")!&gt;&gt;&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt; AND&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+
+IF (@@ERROR &lt;&gt; 0)
+BEGIN
+    SET @returnCode = @@ERROR
+END
+
+OnExit:
+    SET NOCOUNT OFF
+    RETURN @returnCode
+
+END
+GO
+
+
+
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[&lt;&lt;!tbl!&gt;&gt;Insert]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[&lt;&lt;!tbl!&gt;&gt;Insert]
+
+GO
+CREATE PROCEDURE dbo.&lt;&lt;!tbl!&gt;&gt;Insert
+(
+&lt;&lt;!for column col in tbl!&gt;&gt;
+&lt;&lt;!if col.isidentity = false!&gt;&gt;
+  @&lt;&lt;!col.replace(" ","_")!&gt;&gt; &lt;&lt;!col.sqltypefullspec!&gt;&gt; = NULL&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;,&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!else!&gt;&gt;
+  @&lt;&lt;!col.replace(" ","_")!&gt;&gt; &lt;&lt;!col.sqltypefullspec!&gt;&gt; OUTPUT&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;,&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+)
+AS BEGIN
+
+DECLARE @returnCode int
+SET @returnCode = 0
+
+INSERT INTO [&lt;&lt;!tbl!&gt;&gt;]
+(
+&lt;&lt;!for column col in tbl!&gt;&gt;
+&lt;&lt;!if col.isidentity = false!&gt;&gt;
+    [&lt;&lt;!col!&gt;&gt;]&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;,&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+)
+VALUES
+(
+&lt;&lt;!for column col in tbl!&gt;&gt;
+&lt;&lt;!if col.isidentity = false!&gt;&gt;
+    @&lt;&lt;!col.replace(" ","_")!&gt;&gt;&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;,&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+)
+
+IF (@@ERROR &lt;&gt; 0)
+BEGIN
+    SET @returnCode = @@ERROR
+END
+
+&lt;&lt;!for idcolumn col in tbl!&gt;&gt;
+SET @&lt;&lt;!col.replace(" ","_")!&gt;&gt; = SCOPE_IDENTITY()
+&lt;&lt;!end!&gt;&gt;
+
+OnExit:
+    RETURN @returnCode
+END
+GO
+
+
+
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[&lt;&lt;!tbl!&gt;&gt;Update]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[&lt;&lt;!tbl!&gt;&gt;Update]
+
+GO
+CREATE PROCEDURE dbo.&lt;&lt;!tbl!&gt;&gt;Update
+(
+&lt;&lt;!for column col in tbl!&gt;&gt;
+  @&lt;&lt;!col.replace(" ","_")!&gt;&gt; &lt;&lt;!col.sqltypefullspec!&gt;&gt; = NULL&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;,&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+)
+AS BEGIN
+
+DECLARE @returnCode int
+SET @returnCode = 0
+
+UPDATE [&lt;&lt;!tbl!&gt;&gt;]
+SET
+&lt;&lt;!for column col in tbl!&gt;&gt;
+&lt;&lt;!if col.isprimarykey = false and col.isidentity = false!&gt;&gt;
+    [&lt;&lt;!col!&gt;&gt;] = @&lt;&lt;!col.replace(" ","_")!&gt;&gt;&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;,&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!if tbl.pkcolumncount &gt; 0!&gt;&gt;
+WHERE
+&lt;&lt;!for pkcolumn col in tbl!&gt;&gt;
+    [&lt;&lt;!col!&gt;&gt;] = @&lt;&lt;!col.replace(" ","_")!&gt;&gt;&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt; AND&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+
+IF (@@ERROR &lt;&gt; 0)
+BEGIN
+    SET @returnCode = @@ERROR
+END
+
+OnExit:
+    RETURN @returnCode
+END
+ GO
+
+
+GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[&lt;&lt;!tbl!&gt;&gt;Delete]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[&lt;&lt;!tbl!&gt;&gt;Delete]
+
+GO
+CREATE PROCEDURE dbo.&lt;&lt;!tbl!&gt;&gt;Delete
+&lt;&lt;!if tbl.pkcolumncount &gt; 0!&gt;&gt;
+(
+&lt;&lt;!for pkcolumn col in tbl!&gt;&gt;
+  @&lt;&lt;!col.replace(" ","_")!&gt;&gt; &lt;&lt;!col.sqltypefullspec!&gt;&gt; = NULL&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;,&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+)
+&lt;&lt;!end!&gt;&gt;
+AS BEGIN
+
+DECLARE @returnCode int
+SET @returnCode = 0
+
+DELETE FROM [&lt;&lt;!tbl!&gt;&gt;]
+&lt;&lt;!if tbl.pkcolumncount &gt; 0!&gt;&gt;
+WHERE
+&lt;&lt;!for pkcolumn col in tbl!&gt;&gt;
+    [&lt;&lt;!col!&gt;&gt;] = @&lt;&lt;!col.replace(" ","_")!&gt;&gt;&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt; AND&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+
+IF (@@ERROR &lt;&gt; 0)
+BEGIN
+SET @returnCode = @@ERROR
+END
+
+OnExit:
+    RETURN @returnCode
+END
+ GO
+&lt;&lt;!end!&gt;&gt;</Text>
+        </Template>
+      </Templates>
+      <VBCode />
+      <CSCode />
+    </MDPackage>
+  </Packages>
+  <Bin />
+</MDProject>
