@@ -1,0 +1,1747 @@
+<?xml version="1.0"?>
+<MDProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="www.metadrone.com.angry.army.1.0">
+  <Name>QueryAdaptor</Name>
+  <Profile>
+    <OpenEditorGUIDs>
+      <string>020cfe6f-5b36-40d5-a1c0-f3e8378ef35c</string>
+      <string>acc2389d-9546-4022-9b83-eee816ca06d8</string>
+      <string>1c245625-deaf-47f3-a649-2765f0de6969</string>
+      <string>cf2e6492-46f9-458e-bb81-d5a0791e6896</string>
+    </OpenEditorGUIDs>
+    <SelectedEditorGUID>cf2e6492-46f9-458e-bb81-d5a0791e6896</SelectedEditorGUID>
+  </Profile>
+  <Properties>
+    <EditorGUID>020cfe6f-5b36-40d5-a1c0-f3e8378ef35c</EditorGUID>
+    <BeginTag>&lt;&lt;!</BeginTag>
+    <EndTag>!&gt;&gt;</EndTag>
+    <SuperMain>call QueryAdaptor</SuperMain>
+  </Properties>
+  <Folders />
+  <Sources>
+    <Source>
+      <Name>Source</Name>
+      <Provider>SQLServer</Provider>
+      <ConnectionString />
+      <SchemaQuery>SELECT DISTINCT 
+    INFORMATION_SCHEMA.TABLES.TABLE_NAME                AS TABLE_NAME,
+    INFORMATION_SCHEMA.TABLES.TABLE_TYPE                AS TABLE_TYPE,
+    INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME              AS COLUMN_NAME, 
+    INFORMATION_SCHEMA.COLUMNS.DATA_TYPE                AS DATA_TYPE, 
+    INFORMATION_SCHEMA.COLUMNS.ORDINAL_POSITION         AS ORDINAL_POSITION, 
+    INFORMATION_SCHEMA.COLUMNS.CHARACTER_MAXIMUM_LENGTH AS CHARACTER_MAXIMUM_LENGTH, 
+    INFORMATION_SCHEMA.COLUMNS.NUMERIC_PRECISION        AS NUMERIC_PRECISION, 
+    INFORMATION_SCHEMA.COLUMNS.NUMERIC_SCALE            AS NUMERIC_SCALE, 
+    INFORMATION_SCHEMA.COLUMNS.IS_NULLABLE              AS IS_NULLABLE, 
+    ISNULL(ColumnProperty(Object_ID(QuoteName(KEY_COLUMN_USAGE.TABLE_SCHEMA) + '.' + QuoteName(KEY_COLUMN_USAGE.TABLE_NAME)), 
+                                              KEY_COLUMN_USAGE.COLUMN_NAME, 'IsIdentity'), 0) 
+                                                        AS IS_IDENTITY, 
+    (SELECT TOP 1 INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE 
+     FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+     INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE ON INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.TABLE_NAME = INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME 
+     AND INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.CONSTRAINT_NAME = INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_NAME 
+     WHERE INFORMATION_SCHEMA.TABLE_CONSTRAINTS.TABLE_NAME = INFORMATION_SCHEMA.COLUMNS.TABLE_NAME 
+     AND INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE.COLUMN_NAME = INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME
+     AND INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE IN ('PRIMARY KEY', 'FOREIGN KEY')) 
+                                                        AS CONSTRAINT_TYPE 
+FROM 
+    INFORMATION_SCHEMA.TABLES 
+LEFT JOIN 
+    INFORMATION_SCHEMA.COLUMNS ON INFORMATION_SCHEMA.COLUMNS.TABLE_NAME = INFORMATION_SCHEMA.TABLES.TABLE_NAME 
+LEFT JOIN 
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE ON INFORMATION_SCHEMA.KEY_COLUMN_USAGE.TABLE_NAME = INFORMATION_SCHEMA.COLUMNS.TABLE_NAME 
+    AND 
+    INFORMATION_SCHEMA.KEY_COLUMN_USAGE.COLUMN_NAME = INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME 
+WHERE 
+    INFORMATION_SCHEMA.TABLES.TABLE_NAME &lt;&gt; 'sysdiagrams' 
+AND 
+    INFORMATION_SCHEMA.TABLES.TABLE_NAME &lt;&gt; 'sysmessages' 
+AND 
+    INFORMATION_SCHEMA.TABLES.TABLE_NAME &lt;&gt; 'sysobjects' 
+ORDER BY 
+    INFORMATION_SCHEMA.TABLES.TABLE_NAME, 
+    INFORMATION_SCHEMA.COLUMNS.ORDINAL_POSITION
+</SchemaQuery>
+      <TableSchemaQuery />
+      <ColumnSchemaQuery />
+      <TableNamePlaceHolder />
+      <RoutineSchemaQuery>SELECT
+	INFORMATION_SCHEMA.ROUTINES.ROUTINE_NAME				AS ROUTINE_NAME,
+	INFORMATION_SCHEMA.ROUTINES.ROUTINE_TYPE				AS ROUTINE_TYPE,
+	INFORMATION_SCHEMA.PARAMETERS.PARAMETER_NAME			AS PARAMETER_NAME,
+	INFORMATION_SCHEMA.PARAMETERS.PARAMETER_MODE			AS PARAMETER_MODE,
+	INFORMATION_SCHEMA.PARAMETERS.DATA_TYPE					AS DATA_TYPE,
+	INFORMATION_SCHEMA.PARAMETERS.ORDINAL_POSITION			AS ORDINAL_POSITION,
+	INFORMATION_SCHEMA.PARAMETERS.CHARACTER_MAXIMUM_LENGTH	AS CHARACTER_MAXIMUM_LENGTH,
+	INFORMATION_SCHEMA.PARAMETERS.NUMERIC_PRECISION			AS NUMERIC_PRECISION,
+	INFORMATION_SCHEMA.PARAMETERS.NUMERIC_SCALE				AS NUMERIC_SCALE
+FROM
+	INFORMATION_SCHEMA.ROUTINES 
+LEFT JOIN
+	INFORMATION_SCHEMA.PARAMETERS ON INFORMATION_SCHEMA.PARAMETERS.SPECIFIC_NAME = INFORMATION_SCHEMA.ROUTINES.SPECIFIC_NAME
+ORDER BY
+	INFORMATION_SCHEMA.ROUTINES.SPECIFIC_NAME,
+	INFORMATION_SCHEMA.PARAMETERS.ORDINAL_POSITION
+</RoutineSchemaQuery>
+      <Transformations>//Set column property values
+set column.lastpos = column.listpos &lt; column.listcount
+set column.sqltype = column.datatype
+set column.sqltypefullspec = column.datatype
+
+if column.datatype = "bit"
+	set column.vbtype = "Boolean"
+	set column.cstype = "bool"
+	set column.vbdefval = "False"
+	set column.csdefval = "false"
+	
+elseif column.datatype = "int" or column.datatype = "int identity"
+	set column.vbtype = "Integer"
+	set column.cstype = "int"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "bigint" or column.datatype = "bigint identity"
+	set column.vbtype = "Int64"
+	set column.cstype = "int"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "smallint" or column.datatype = "smallint identity"
+	set column.vbtype = "Int16"
+	set column.cstype = "int"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "tinyint"
+	set column.vbtype = "Byte"
+	set column.cstype = "byte"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	
+elseif column.datatype = "varchar"
+	set column.vbtype = "String"
+	set column.cstype = "string"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	if column.length = -1
+		set column.sqltypefullspec = column.datatype + "(max)"
+	else
+		set column.sqltypefullspec = column.datatype + "(" + column.length + ")"
+	end
+	
+elseif column.datatype = "nvarchar"
+	set column.vbtype = "String"
+	set column.cstype = "string"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	if column.length = -1
+		set column.sqltypefullspec = column.datatype + "(max)"
+	else
+		set column.sqltypefullspec = column.datatype + "(" + column.length + ")"
+	end
+	
+elseif column.datatype = "text" or column.datatype = "ntext" or column.datatype = "xml" or column.datatype = "sysname"
+	set column.vbtype = "String"
+	set column.cstype = "string"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	
+elseif column.datatype = "char" or column.datatype = "nchar"
+	set column.vbtype = "String"
+	set column.cstype = "string"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	set column.sqltypefullspec = column.datatype + "(" + column.length + ")"
+	
+elseif column.datatype = "decimal" or column.datatype = "numeric"
+	set column.vbtype = "Decimal"
+	set column.cstype = "decimal"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	set column.sqltypefullspec = column.datatype + "(" + column.precision + "," + column.scale + ")"
+	
+elseif column.datatype = "float"
+	set column.vbtype = "Double"
+	set column.cstype = "double"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "real"
+	set column.vbtype = "Single"
+	set column.cstype = "float"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "money" or column.datatype = "smallmoney"
+	set column.vbtype = "Decimal"
+	set column.cstype = "decimal"
+	set column.vbdefval = 0
+	set column.csdefval = 0
+	
+elseif column.datatype = "datetime" or column.datatype = "smalldatetime" or column.datatype = "timestamp"
+	set column.vbtype = "DateTime"
+	set column.cstype = "DateTime"
+	set column.vbdefval = "System.DateTime.Now"
+	set column.csdefval = "System.DateTime.Now"
+	
+elseif column.datatype = "binary" or column.datatype = "image"
+	set column.vbtype = "Byte()"
+	set column.cstype = "byte[]"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	set column.sqltypefullspec = column.datatype + "(" + column.length + ")"
+	
+elseif column.datatype = "varbinary"
+	set column.vbtype = "Byte()"
+	set column.cstype = "byte[]"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	if column.length = -1
+		set column.sqltypefullspec = column.datatype + "(max)"
+	else
+		set column.sqltypefullspec = column.datatype + "(" + column.length + ")"
+	end
+	
+elseif column.datatype = "sql_variant"
+	set column.vbtype = "Object"
+	set column.cstype = "object"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	
+elseif column.datatype = "uniqueidentifier"
+	set column.vbtype = "Guid"
+	set column.cstype = "Guid"
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	
+else
+	set column.vbtype = column.datatype
+	set column.cstype = column.datatype
+	set column.vbdefval = "Nothing"
+	set column.csdefval = "null"
+	
+end
+
+
+
+
+//Set parameter property values
+set param.lastpos = column.listpos &lt; column.listcount
+set param.sqltype = param.datatype
+set param.sqltypefullspec = param.datatype
+
+if param.datatype = "bit"
+	set param.vbtype = "Boolean"
+	set param.cstype = "bool"
+	set param.vbdefval = "False"
+	set param.csdefval = "false"
+	
+elseif param.datatype = "int" or param.datatype = "int identity"
+	set param.vbtype = "Integer"
+	set param.cstype = "int"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "bigint" or param.datatype = "bigint identity"
+	set param.vbtype = "Int64"
+	set param.cstype = "int"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "smallint" or param.datatype = "smallint identity"
+	set param.vbtype = "Int16"
+	set param.cstype = "int"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "tinyint"
+	set param.vbtype = "Byte"
+	set param.cstype = "byte"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	
+elseif param.datatype = "varchar"
+	set param.vbtype = "String"
+	set param.cstype = "string"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	if param.length = -1
+		set param.sqltypefullspec = param.datatype + "(max)"
+	else
+		set param.sqltypefullspec = param.datatype + "(" + param.length + ")"
+	end
+	
+elseif param.datatype = "nvarchar"
+	set param.vbtype = "String"
+	set param.cstype = "string"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	if param.length = -1
+		set param.sqltypefullspec = param.datatype + "(max)"
+	else
+		set param.sqltypefullspec = param.datatype + "(" + param.length + ")"
+	end
+	
+elseif param.datatype = "text" or param.datatype = "ntext" or param.datatype = "xml" or param.datatype = "sysname"
+	set param.vbtype = "String"
+	set param.cstype = "string"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	
+elseif param.datatype = "char" or param.datatype = "nchar"
+	set param.vbtype = "String"
+	set param.cstype = "string"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	set param.sqltypefullspec = param.datatype + "(" + param.length + ")"
+	
+elseif param.datatype = "decimal" or param.datatype = "numeric"
+	set param.vbtype = "Decimal"
+	set param.cstype = "decimal"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	set param.sqltypefullspec = param.datatype + "(" + param.precision + "," + param.scale + ")"
+	
+elseif param.datatype = "float"
+	set param.vbtype = "Double"
+	set param.cstype = "double"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "real"
+	set param.vbtype = "Single"
+	set param.cstype = "float"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "money" or param.datatype = "smallmoney"
+	set param.vbtype = "Decimal"
+	set param.cstype = "decimal"
+	set param.vbdefval = 0
+	set param.csdefval = 0
+	
+elseif param.datatype = "datetime" or param.datatype = "smalldatetime" or param.datatype = "timestamp"
+	set param.vbtype = "DateTime"
+	set param.cstype = "DateTime"
+	set param.vbdefval = "System.DateTime.Now"
+	set param.csdefval = "System.DateTime.Now"
+	
+elseif param.datatype = "binary" or param.datatype = "image"
+	set param.vbtype = "Byte()"
+	set param.cstype = "byte[]"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	set param.sqltypefullspec = param.datatype + "(" + param.length + ")"
+	
+elseif param.datatype = "varbinary"
+	set param.vbtype = "Byte()"
+	set param.cstype = "byte[]"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	if param.length = -1
+		set param.sqltypefullspec = param.datatype + "(max)"
+	else
+		set param.sqltypefullspec = param.datatype + "(" + param.length + ")"
+	end
+	
+elseif param.datatype = "sql_variant"
+	set param.vbtype = "Object"
+	set param.cstype = "object"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	
+elseif param.datatype = "uniqueidentifier"
+	set param.vbtype = "Guid"
+	set param.cstype = "Guid"
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	
+else
+	set param.vbtype = param.datatype
+	set param.cstype = param.datatype
+	set param.vbdefval = "Nothing"
+	set param.csdefval = "null"
+	
+end
+</Transformations>
+      <EditorGUID>cf2e6492-46f9-458e-bb81-d5a0791e6896</EditorGUID>
+    </Source>
+  </Sources>
+  <Packages>
+    <MDPackage>
+      <TagVal>
+        <GUID>a4b098d2-a1a3-46f6-921a-bdae7eb24d1c</GUID>
+      </TagVal>
+      <Name>QueryAdaptor</Name>
+      <Main>
+        <EditorGUID>acc2389d-9546-4022-9b83-eee816ca06d8</EditorGUID>
+        <OwnerGUID>a4b098d2-a1a3-46f6-921a-bdae7eb24d1c</OwnerGUID>
+        <Text>//**** Preprocessors ******
+#ignorecase on  // case sensitivity of string comparisons
+#safebegin = "' safe start"
+#safeend = "' safe end"
+
+call QueriesAdaptor(sources.Source)
+</Text>
+      </Main>
+      <Folders />
+      <Templates>
+        <Template>
+          <Name>QueriesAdaptor</Name>
+          <EditorGUID>1c245625-deaf-47f3-a649-2765f0de6969</EditorGUID>
+          <OwnerGUID>a4b098d2-a1a3-46f6-921a-bdae7eb24d1c</OwnerGUID>
+          <Text>&lt;&lt;!header; is QueriesAdaptor(conn)
+   return "QueriesAdaptor.vb"
+end!&gt;&gt;
+'------------------------------------------------------------------------------
+' &lt;auto-generated&gt;
+'     Originally by Visual Studio 2008, this by Metadrone.
+'
+'     Changes to this file may cause incorrect behavior and will be lost if
+'     the code is regenerated.
+' &lt;/auto-generated&gt;
+'------------------------------------------------------------------------------
+
+Option Strict Off
+Option Explicit On
+
+
+
+'''&lt;summary&gt;
+'''Represents a strongly typed in-memory cache of data.
+'''&lt;/summary&gt;
+&lt;Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "2.0.0.0"), _
+ Global.System.Serializable(), _
+ Global.System.ComponentModel.DesignerCategoryAttribute("code"), _
+ Global.System.ComponentModel.ToolboxItem(True), _
+ Global.System.Xml.Serialization.XmlSchemaProviderAttribute("GetTypedDataSetSchema"), _
+ Global.System.Xml.Serialization.XmlRootAttribute("QueriesAdaptor"), _
+ Global.System.ComponentModel.Design.HelpKeywordAttribute("vs.data.DataSet")&gt; _
+Partial Public Class QueriesAdaptor
+    Inherits Global.System.Data.DataSet
+
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+    Private table&lt;&lt;!proc!&gt;&gt; As &lt;&lt;!proc!&gt;&gt;DataTable
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+    Private _schemaSerializationMode As Global.System.Data.SchemaSerializationMode = Global.System.Data.SchemaSerializationMode.IncludeSchema
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Public Sub New()
+        MyBase.New()
+        Me.BeginInit()
+        Me.InitClass()
+        Dim schemaChangedHandler As Global.System.ComponentModel.CollectionChangeEventHandler = AddressOf Me.SchemaChanged
+        AddHandler MyBase.Tables.CollectionChanged, schemaChangedHandler
+        AddHandler MyBase.Relations.CollectionChanged, schemaChangedHandler
+        Me.EndInit()
+    End Sub
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Protected Sub New(ByVal info As Global.System.Runtime.Serialization.SerializationInfo, ByVal context As Global.System.Runtime.Serialization.StreamingContext)
+        MyBase.New(info, context, False)
+        If (Me.IsBinarySerialized(info, context) = True) Then
+            Me.InitVars(False)
+            Dim schemaChangedHandler1 As Global.System.ComponentModel.CollectionChangeEventHandler = AddressOf Me.SchemaChanged
+            AddHandler Me.Tables.CollectionChanged, schemaChangedHandler1
+            AddHandler Me.Relations.CollectionChanged, schemaChangedHandler1
+            Return
+        End If
+        Dim strSchema As String = CType(info.GetValue("XmlSchema", GetType(String)), String)
+        If (Me.DetermineSchemaSerializationMode(info, context) = Global.System.Data.SchemaSerializationMode.IncludeSchema) Then
+            Dim ds As Global.System.Data.DataSet = New Global.System.Data.DataSet
+            ds.ReadXmlSchema(New Global.System.Xml.XmlTextReader(New Global.System.IO.StringReader(strSchema)))
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+            If (Not (ds.Tables("&lt;&lt;!proc!&gt;&gt;")) Is Nothing) Then
+                MyBase.Tables.Add(New &lt;&lt;!proc!&gt;&gt;DataTable(ds.Tables("&lt;&lt;!proc!&gt;&gt;")))
+            End If
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+            Me.DataSetName = ds.DataSetName
+            Me.Prefix = ds.Prefix
+            Me.Namespace = ds.Namespace
+            Me.Locale = ds.Locale
+            Me.CaseSensitive = ds.CaseSensitive
+            Me.EnforceConstraints = ds.EnforceConstraints
+            Me.Merge(ds, False, Global.System.Data.MissingSchemaAction.Add)
+            Me.InitVars()
+        Else
+            Me.ReadXmlSchema(New Global.System.Xml.XmlTextReader(New Global.System.IO.StringReader(strSchema)))
+        End If
+        Me.GetSerializationData(info, context)
+        Dim schemaChangedHandler As Global.System.ComponentModel.CollectionChangeEventHandler = AddressOf Me.SchemaChanged
+        AddHandler MyBase.Tables.CollectionChanged, schemaChangedHandler
+        AddHandler Me.Relations.CollectionChanged, schemaChangedHandler
+    End Sub
+
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
+     Global.System.ComponentModel.Browsable(False), _
+     Global.System.ComponentModel.DesignerSerializationVisibility(Global.System.ComponentModel.DesignerSerializationVisibility.Content)&gt; _
+    Public ReadOnly Property &lt;&lt;!proc!&gt;&gt;() As &lt;&lt;!proc!&gt;&gt;DataTable
+        Get
+            Return Me.table&lt;&lt;!proc!&gt;&gt;
+        End Get
+    End Property
+&lt;&lt;!end!&gt;&gt;
+
+&lt;&lt;!end!&gt;&gt;
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
+     Global.System.ComponentModel.BrowsableAttribute(True), _
+     Global.System.ComponentModel.DesignerSerializationVisibilityAttribute(Global.System.ComponentModel.DesignerSerializationVisibility.Visible)&gt; _
+    Public Overrides Property SchemaSerializationMode() As Global.System.Data.SchemaSerializationMode
+        Get
+            Return Me._schemaSerializationMode
+        End Get
+        Set(ByVal value As Global.System.Data.SchemaSerializationMode)
+            Me._schemaSerializationMode = value
+        End Set
+    End Property
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
+     Global.System.ComponentModel.DesignerSerializationVisibilityAttribute(Global.System.ComponentModel.DesignerSerializationVisibility.Hidden)&gt; _
+    Public Shadows ReadOnly Property Tables() As Global.System.Data.DataTableCollection
+        Get
+            Return MyBase.Tables
+        End Get
+    End Property
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
+     Global.System.ComponentModel.DesignerSerializationVisibilityAttribute(Global.System.ComponentModel.DesignerSerializationVisibility.Hidden)&gt; _
+    Public Shadows ReadOnly Property Relations() As Global.System.Data.DataRelationCollection
+        Get
+            Return MyBase.Relations
+        End Get
+    End Property
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Protected Overrides Sub InitializeDerivedDataSet()
+        Me.BeginInit()
+        Me.InitClass()
+        Me.EndInit()
+    End Sub
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Public Overrides Function Clone() As Global.System.Data.DataSet
+        Dim cln As QueriesAdaptor = CType(MyBase.Clone, QueriesAdaptor)
+        cln.InitVars()
+        cln.SchemaSerializationMode = Me.SchemaSerializationMode
+        Return cln
+    End Function
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Protected Overrides Function ShouldSerializeTables() As Boolean
+        Return False
+    End Function
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Protected Overrides Function ShouldSerializeRelations() As Boolean
+        Return False
+    End Function
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Protected Overrides Sub ReadXmlSerializable(ByVal reader As Global.System.Xml.XmlReader)
+        If (Me.DetermineSchemaSerializationMode(reader) = Global.System.Data.SchemaSerializationMode.IncludeSchema) Then
+            Me.Reset()
+            Dim ds As Global.System.Data.DataSet = New Global.System.Data.DataSet
+            ds.ReadXml(reader)
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+            If (Not (ds.Tables("&lt;&lt;!proc!&gt;&gt;")) Is Nothing) Then
+                MyBase.Tables.Add(New &lt;&lt;!proc!&gt;&gt;DataTable(ds.Tables("&lt;&lt;!proc!&gt;&gt;")))
+            End If
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+            Me.DataSetName = ds.DataSetName
+            Me.Prefix = ds.Prefix
+            Me.Namespace = ds.Namespace
+            Me.Locale = ds.Locale
+            Me.CaseSensitive = ds.CaseSensitive
+            Me.EnforceConstraints = ds.EnforceConstraints
+            Me.Merge(ds, False, Global.System.Data.MissingSchemaAction.Add)
+            Me.InitVars()
+        Else
+            Me.ReadXml(reader)
+            Me.InitVars()
+        End If
+    End Sub
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Protected Overrides Function GetSchemaSerializable() As Global.System.Xml.Schema.XmlSchema
+        Dim stream As Global.System.IO.MemoryStream = New Global.System.IO.MemoryStream
+        Me.WriteXmlSchema(New Global.System.Xml.XmlTextWriter(stream, Nothing))
+        stream.Position = 0
+        Return Global.System.Xml.Schema.XmlSchema.Read(New Global.System.Xml.XmlTextReader(stream), Nothing)
+    End Function
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Friend Overloads Sub InitVars()
+        Me.InitVars(True)
+    End Sub
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Friend Overloads Sub InitVars(ByVal initTable As Boolean)
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+        Me.table&lt;&lt;!proc!&gt;&gt; = CType(MyBase.Tables("&lt;&lt;!proc!&gt;&gt;"), &lt;&lt;!proc!&gt;&gt;DataTable)
+        If (initTable = True) Then
+            If (Not (Me.table&lt;&lt;!proc!&gt;&gt;) Is Nothing) Then
+                Me.table&lt;&lt;!proc!&gt;&gt;.InitVars()
+            End If
+        End If
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+    End Sub
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Private Sub InitClass()
+        Me.DataSetName = "QueriesAdaptor"
+        Me.Prefix = ""
+        Me.Namespace = "http://tempuri.org/QueriesAdaptor.xsd"
+        Me.EnforceConstraints = True
+        Me.SchemaSerializationMode = Global.System.Data.SchemaSerializationMode.IncludeSchema
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+        Me.table&lt;&lt;!proc!&gt;&gt; = New &lt;&lt;!proc!&gt;&gt;DataTable
+        MyBase.Tables.Add(Me.table&lt;&lt;!proc!&gt;&gt;)
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+    End Sub
+
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Private Function ShouldSerialize&lt;&lt;!proc!&gt;&gt;() As Boolean
+        Return False
+    End Function
+&lt;&lt;!end!&gt;&gt;
+
+&lt;&lt;!end!&gt;&gt;
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Private Sub SchemaChanged(ByVal sender As Object, ByVal e As Global.System.ComponentModel.CollectionChangeEventArgs)
+        If (e.Action = Global.System.ComponentModel.CollectionChangeAction.Remove) Then
+            Me.InitVars()
+        End If
+    End Sub
+
+    &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+    Public Shared Function GetTypedDataSetSchema(ByVal xs As Global.System.Xml.Schema.XmlSchemaSet) As Global.System.Xml.Schema.XmlSchemaComplexType
+        Dim ds As QueriesAdaptor = New QueriesAdaptor
+        Dim type As Global.System.Xml.Schema.XmlSchemaComplexType = New Global.System.Xml.Schema.XmlSchemaComplexType
+        Dim sequence As Global.System.Xml.Schema.XmlSchemaSequence = New Global.System.Xml.Schema.XmlSchemaSequence
+        Dim any As Global.System.Xml.Schema.XmlSchemaAny = New Global.System.Xml.Schema.XmlSchemaAny
+        any.Namespace = ds.Namespace
+        sequence.Items.Add(any)
+        type.Particle = sequence
+        Dim dsSchema As Global.System.Xml.Schema.XmlSchema = ds.GetSchemaSerializable
+        If xs.Contains(dsSchema.TargetNamespace) Then
+            Dim s1 As Global.System.IO.MemoryStream = New Global.System.IO.MemoryStream
+            Dim s2 As Global.System.IO.MemoryStream = New Global.System.IO.MemoryStream
+            Try
+                Dim schema As Global.System.Xml.Schema.XmlSchema = Nothing
+                dsSchema.Write(s1)
+                Dim schemas As Global.System.Collections.IEnumerator = xs.Schemas(dsSchema.TargetNamespace).GetEnumerator
+                Do While schemas.MoveNext
+                    schema = CType(schemas.Current, Global.System.Xml.Schema.XmlSchema)
+                    s2.SetLength(0)
+                    schema.Write(s2)
+                    If (s1.Length = s2.Length) Then
+                        s1.Position = 0
+                        s2.Position = 0
+
+                        Do While ((s1.Position &lt;&gt; s1.Length) _
+                                    AndAlso (s1.ReadByte = s2.ReadByte))
+
+
+                        Loop
+                        If (s1.Position = s1.Length) Then
+                            Return type
+                        End If
+                    End If
+
+                Loop
+            Finally
+                If (Not (s1) Is Nothing) Then
+                    s1.Close()
+                End If
+                If (Not (s2) Is Nothing) Then
+                    s2.Close()
+                End If
+            End Try
+        End If
+        xs.Add(dsSchema)
+        Return type
+    End Function
+
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+    Public Delegate Sub &lt;&lt;!proc!&gt;&gt;RowChangeEventHandler(ByVal sender As Object, ByVal e As &lt;&lt;!proc!&gt;&gt;RowChangeEvent)
+&lt;&lt;!end!&gt;&gt;
+
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+    '''&lt;summary&gt;
+    '''Represents the strongly named DataTable class.
+    '''&lt;/summary&gt;
+    &lt;Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "2.0.0.0"), _
+     Global.System.Serializable(), _
+     Global.System.Xml.Serialization.XmlSchemaProviderAttribute("GetTypedTableSchema")&gt; _
+    Partial Public Class &lt;&lt;!proc!&gt;&gt;DataTable
+        Inherits Global.System.Data.TypedTableBase(Of &lt;&lt;!proc!&gt;&gt;Row)
+
+&lt;&lt;!for column col in proc!&gt;&gt;
+        Private column&lt;&lt;!col!&gt;&gt; As Global.System.Data.DataColumn
+
+&lt;&lt;!end!&gt;&gt;
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Sub New()
+            MyBase.New()
+            Me.TableName = "&lt;&lt;!proc!&gt;&gt;"
+            Me.BeginInit()
+            Me.InitClass()
+            Me.EndInit()
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Friend Sub New(ByVal table As Global.System.Data.DataTable)
+            MyBase.New()
+            Me.TableName = table.TableName
+            If (table.CaseSensitive &lt;&gt; table.DataSet.CaseSensitive) Then
+                Me.CaseSensitive = table.CaseSensitive
+            End If
+            If (table.Locale.ToString &lt;&gt; table.DataSet.Locale.ToString) Then
+                Me.Locale = table.Locale
+            End If
+            If (table.Namespace &lt;&gt; table.DataSet.Namespace) Then
+                Me.Namespace = table.Namespace
+            End If
+            Me.Prefix = table.Prefix
+            Me.MinimumCapacity = table.MinimumCapacity
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Sub New(ByVal info As Global.System.Runtime.Serialization.SerializationInfo, ByVal context As Global.System.Runtime.Serialization.StreamingContext)
+            MyBase.New(info, context)
+            Me.InitVars()
+        End Sub
+
+&lt;&lt;!for column col in proc!&gt;&gt;
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public ReadOnly Property &lt;&lt;!col!&gt;&gt;Column() As Global.System.Data.DataColumn
+            Get
+                Return Me.column&lt;&lt;!col!&gt;&gt;
+            End Get
+        End Property
+
+&lt;&lt;!end!&gt;&gt;
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
+         Global.System.ComponentModel.Browsable(False)&gt; _
+        Public ReadOnly Property Count() As Integer
+            Get
+                Return Me.Rows.Count
+            End Get
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Default Public ReadOnly Property Item(ByVal index As Integer) As &lt;&lt;!proc!&gt;&gt;Row
+            Get
+                Return CType(Me.Rows(index), &lt;&lt;!proc!&gt;&gt;Row)
+            End Get
+        End Property
+
+        Public Event &lt;&lt;!proc!&gt;&gt;RowChanging As &lt;&lt;!proc!&gt;&gt;RowChangeEventHandler
+
+        Public Event &lt;&lt;!proc!&gt;&gt;RowChanged As &lt;&lt;!proc!&gt;&gt;RowChangeEventHandler
+
+        Public Event &lt;&lt;!proc!&gt;&gt;RowDeleting As &lt;&lt;!proc!&gt;&gt;RowChangeEventHandler
+
+        Public Event &lt;&lt;!proc!&gt;&gt;RowDeleted As &lt;&lt;!proc!&gt;&gt;RowChangeEventHandler
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Overloads Sub Add&lt;&lt;!proc!&gt;&gt;Row(ByVal row As &lt;&lt;!proc!&gt;&gt;Row)
+            Me.Rows.Add(row)
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Overloads Function Add&lt;&lt;!proc!&gt;&gt;Row(&lt;&lt;!for column col in proc!&gt;&gt;&lt;&lt;!if col.isidentity = false!&gt;&gt;ByVal &lt;&lt;!col!&gt;&gt; As &lt;&lt;!col.vbtype!&gt;&gt;&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;, &lt;&lt;!end!&gt;&gt;&lt;&lt;!end!&gt;&gt;&lt;&lt;!end!&gt;&gt;) As &lt;&lt;!proc!&gt;&gt;Row
+            Dim row&lt;&lt;!proc!&gt;&gt;Row As &lt;&lt;!proc!&gt;&gt;Row = CType(Me.NewRow, &lt;&lt;!proc!&gt;&gt;Row)
+            Dim columnValuesArray() As Object = New Object() {&lt;&lt;!for column col in proc!&gt;&gt;&lt;&lt;!if col.isidentity = true!&gt;&gt;Nothing&lt;&lt;!else!&gt;&gt;&lt;&lt;!col!&gt;&gt;&lt;&lt;!end!&gt;&gt;&lt;&lt;!if col.listpos &lt; col.listcount!&gt;&gt;, &lt;&lt;!end!&gt;&gt;&lt;&lt;!end!&gt;&gt;}
+            row&lt;&lt;!proc!&gt;&gt;Row.ItemArray = columnValuesArray
+            Me.Rows.Add(row&lt;&lt;!proc!&gt;&gt;Row)
+            Return row&lt;&lt;!proc!&gt;&gt;Row
+        End Function
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Function FindByID(ByVal ID As Integer) As &lt;&lt;!proc!&gt;&gt;Row
+            Return CType(Me.Rows.Find(New Object() {ID}), &lt;&lt;!proc!&gt;&gt;Row)
+        End Function
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Overrides Function Clone() As Global.System.Data.DataTable
+            Dim cln As &lt;&lt;!proc!&gt;&gt;DataTable = CType(MyBase.Clone, &lt;&lt;!proc!&gt;&gt;DataTable)
+            cln.InitVars()
+            Return cln
+        End Function
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Overrides Function CreateInstance() As Global.System.Data.DataTable
+            Return New &lt;&lt;!proc!&gt;&gt;DataTable
+        End Function
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Friend Sub InitVars()
+&lt;&lt;!for column col in proc!&gt;&gt;
+            Me.column&lt;&lt;!col!&gt;&gt; = MyBase.Columns("&lt;&lt;!col!&gt;&gt;")
+&lt;&lt;!end!&gt;&gt;
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Private Sub InitClass()
+&lt;&lt;!for column col in proc!&gt;&gt;
+            Me.column&lt;&lt;!col!&gt;&gt; = New Global.System.Data.DataColumn("&lt;&lt;!col!&gt;&gt;", GetType(&lt;&lt;!col.vbtype!&gt;&gt;), Nothing, Global.System.Data.MappingType.Element)
+            MyBase.Columns.Add(Me.column&lt;&lt;!col!&gt;&gt;)
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!for column col in proc!&gt;&gt;
+&lt;&lt;!if col.isidentity = true!&gt;&gt;
+            Me.Constraints.Add(New Global.System.Data.UniqueConstraint("Constraint&lt;&lt;!col.listpos!&gt;&gt;", New Global.System.Data.DataColumn() {Me.column&lt;&lt;!col!&gt;&gt;}, True))
+            Me.column&lt;&lt;!col!&gt;&gt;.AutoIncrement = True
+            Me.column&lt;&lt;!col!&gt;&gt;.ReadOnly = True
+            Me.column&lt;&lt;!col!&gt;&gt;.Unique = True
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!if col.nullable = false!&gt;&gt;
+            Me.column&lt;&lt;!col!&gt;&gt;.AllowDBNull = False
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!if col.length &gt; 0!&gt;&gt;
+            Me.column&lt;&lt;!col!&gt;&gt;.MaxLength = &lt;&lt;!col.length!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Function New&lt;&lt;!proc!&gt;&gt;Row() As &lt;&lt;!proc!&gt;&gt;Row
+            Return CType(Me.NewRow, &lt;&lt;!proc!&gt;&gt;Row)
+        End Function
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Overrides Function NewRowFromBuilder(ByVal builder As Global.System.Data.DataRowBuilder) As Global.System.Data.DataRow
+            Return New &lt;&lt;!proc!&gt;&gt;Row(builder)
+        End Function
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Overrides Function GetRowType() As Global.System.Type
+            Return GetType(&lt;&lt;!proc!&gt;&gt;Row)
+        End Function
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Overrides Sub OnRowChanged(ByVal e As Global.System.Data.DataRowChangeEventArgs)
+            MyBase.OnRowChanged(e)
+            If (Not (Me.&lt;&lt;!proc!&gt;&gt;RowChangedEvent) Is Nothing) Then
+                RaiseEvent &lt;&lt;!proc!&gt;&gt;RowChanged(Me, New &lt;&lt;!proc!&gt;&gt;RowChangeEvent(CType(e.Row, &lt;&lt;!proc!&gt;&gt;Row), e.Action))
+            End If
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Overrides Sub OnRowChanging(ByVal e As Global.System.Data.DataRowChangeEventArgs)
+            MyBase.OnRowChanging(e)
+            If (Not (Me.&lt;&lt;!proc!&gt;&gt;RowChangingEvent) Is Nothing) Then
+                RaiseEvent &lt;&lt;!proc!&gt;&gt;RowChanging(Me, New &lt;&lt;!proc!&gt;&gt;RowChangeEvent(CType(e.Row, &lt;&lt;!proc!&gt;&gt;Row), e.Action))
+            End If
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Overrides Sub OnRowDeleted(ByVal e As Global.System.Data.DataRowChangeEventArgs)
+            MyBase.OnRowDeleted(e)
+            If (Not (Me.&lt;&lt;!proc!&gt;&gt;RowDeletedEvent) Is Nothing) Then
+                RaiseEvent &lt;&lt;!proc!&gt;&gt;RowDeleted(Me, New &lt;&lt;!proc!&gt;&gt;RowChangeEvent(CType(e.Row, &lt;&lt;!proc!&gt;&gt;Row), e.Action))
+            End If
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Overrides Sub OnRowDeleting(ByVal e As Global.System.Data.DataRowChangeEventArgs)
+            MyBase.OnRowDeleting(e)
+            If (Not (Me.&lt;&lt;!proc!&gt;&gt;RowDeletingEvent) Is Nothing) Then
+                RaiseEvent &lt;&lt;!proc!&gt;&gt;RowDeleting(Me, New &lt;&lt;!proc!&gt;&gt;RowChangeEvent(CType(e.Row, &lt;&lt;!proc!&gt;&gt;Row), e.Action))
+            End If
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Sub Remove&lt;&lt;!proc!&gt;&gt;Row(ByVal row As &lt;&lt;!proc!&gt;&gt;Row)
+            Me.Rows.Remove(row)
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Shared Function GetTypedTableSchema(ByVal xs As Global.System.Xml.Schema.XmlSchemaSet) As Global.System.Xml.Schema.XmlSchemaComplexType
+            Dim type As Global.System.Xml.Schema.XmlSchemaComplexType = New Global.System.Xml.Schema.XmlSchemaComplexType
+            Dim sequence As Global.System.Xml.Schema.XmlSchemaSequence = New Global.System.Xml.Schema.XmlSchemaSequence
+            Dim ds As QueriesAdaptor = New QueriesAdaptor
+            Dim any1 As Global.System.Xml.Schema.XmlSchemaAny = New Global.System.Xml.Schema.XmlSchemaAny
+            any1.Namespace = "http://www.w3.org/2001/XMLSchema"
+            any1.MinOccurs = New Decimal(0)
+            any1.MaxOccurs = Decimal.MaxValue
+            any1.ProcessContents = Global.System.Xml.Schema.XmlSchemaContentProcessing.Lax
+            sequence.Items.Add(any1)
+            Dim any2 As Global.System.Xml.Schema.XmlSchemaAny = New Global.System.Xml.Schema.XmlSchemaAny
+            any2.Namespace = "urn:schemas-microsoft-com:xml-diffgram-v1"
+            any2.MinOccurs = New Decimal(1)
+            any2.ProcessContents = Global.System.Xml.Schema.XmlSchemaContentProcessing.Lax
+            sequence.Items.Add(any2)
+            Dim attribute1 As Global.System.Xml.Schema.XmlSchemaAttribute = New Global.System.Xml.Schema.XmlSchemaAttribute
+            attribute1.Name = "namespace"
+            attribute1.FixedValue = ds.Namespace
+            type.Attributes.Add(attribute1)
+            Dim attribute2 As Global.System.Xml.Schema.XmlSchemaAttribute = New Global.System.Xml.Schema.XmlSchemaAttribute
+            attribute2.Name = "tableTypeName"
+            attribute2.FixedValue = "&lt;&lt;!proc!&gt;&gt;DataTable"
+            type.Attributes.Add(attribute2)
+            type.Particle = sequence
+            Dim dsSchema As Global.System.Xml.Schema.XmlSchema = ds.GetSchemaSerializable
+            If xs.Contains(dsSchema.TargetNamespace) Then
+                Dim s1 As Global.System.IO.MemoryStream = New Global.System.IO.MemoryStream
+                Dim s2 As Global.System.IO.MemoryStream = New Global.System.IO.MemoryStream
+                Try
+                    Dim schema As Global.System.Xml.Schema.XmlSchema = Nothing
+                    dsSchema.Write(s1)
+                    Dim schemas As Global.System.Collections.IEnumerator = xs.Schemas(dsSchema.TargetNamespace).GetEnumerator
+                    Do While schemas.MoveNext
+                        schema = CType(schemas.Current, Global.System.Xml.Schema.XmlSchema)
+                        s2.SetLength(0)
+                        schema.Write(s2)
+                        If (s1.Length = s2.Length) Then
+                            s1.Position = 0
+                            s2.Position = 0
+
+                            Do While ((s1.Position &lt;&gt; s1.Length) _
+                                        AndAlso (s1.ReadByte = s2.ReadByte))
+
+
+                            Loop
+                            If (s1.Position = s1.Length) Then
+                                Return type
+                            End If
+                        End If
+
+                    Loop
+                Finally
+                    If (Not (s1) Is Nothing) Then
+                        s1.Close()
+                    End If
+                    If (Not (s2) Is Nothing) Then
+                        s2.Close()
+                    End If
+                End Try
+            End If
+            xs.Add(dsSchema)
+            Return type
+        End Function
+    End Class
+&lt;&lt;!end!&gt;&gt;
+
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+    '''&lt;summary&gt;
+    '''Represents strongly named DataRow class.
+    '''&lt;/summary&gt;
+    &lt;Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "2.0.0.0")&gt; _
+    Partial Public Class &lt;&lt;!proc!&gt;&gt;Row
+        Inherits Global.System.Data.DataRow
+
+        Private table&lt;&lt;!proc!&gt;&gt; As &lt;&lt;!proc!&gt;&gt;DataTable
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Friend Sub New(ByVal rb As Global.System.Data.DataRowBuilder)
+            MyBase.New(rb)
+            Me.table&lt;&lt;!proc!&gt;&gt; = CType(Me.Table, &lt;&lt;!proc!&gt;&gt;DataTable)
+        End Sub
+&lt;&lt;!for column col in proc!&gt;&gt;
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Property &lt;&lt;!col!&gt;&gt;() As &lt;&lt;!col.vbtype!&gt;&gt;
+            Get
+                Return CType(Me(Me.table&lt;&lt;!proc!&gt;&gt;.&lt;&lt;!col!&gt;&gt;Column), &lt;&lt;!col.vbtype!&gt;&gt;)
+            End Get
+            Set(ByVal value As &lt;&lt;!col.vbtype!&gt;&gt;)
+                Me(Me.table&lt;&lt;!proc!&gt;&gt;.&lt;&lt;!col!&gt;&gt;Column) = value
+            End Set
+        End Property
+&lt;&lt;!end!&gt;&gt;
+    End Class
+&lt;&lt;!end!&gt;&gt;
+
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!set nonqueryneeded = false
+   for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+    '''&lt;summary&gt;
+    '''Row event argument class
+    '''&lt;/summary&gt;
+    &lt;Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "2.0.0.0")&gt; _
+    Public Class &lt;&lt;!proc!&gt;&gt;RowChangeEvent
+        Inherits Global.System.EventArgs
+
+        Private eventRow As &lt;&lt;!proc!&gt;&gt;Row
+
+        Private eventAction As Global.System.Data.DataRowAction
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Sub New(ByVal row As &lt;&lt;!proc!&gt;&gt;Row, ByVal action As Global.System.Data.DataRowAction)
+            MyBase.New()
+            Me.eventRow = row
+            Me.eventAction = action
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public ReadOnly Property Row() As &lt;&lt;!proc!&gt;&gt;Row
+            Get
+                Return Me.eventRow
+            End Get
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public ReadOnly Property Action() As Global.System.Data.DataRowAction
+            Get
+                Return Me.eventAction
+            End Get
+        End Property
+    End Class
+&lt;&lt;!end!&gt;&gt;
+
+&lt;&lt;!end!&gt;&gt;
+End Class
+
+Namespace QueriesAdaptorTableAdapters
+
+&lt;&lt;!for procedure proc in conn!&gt;&gt;
+&lt;&lt;!if proc.columncount &gt; 0!&gt;&gt;
+    '''&lt;summary&gt;
+    '''Represents the connection and commands used to retrieve and save data.
+    '''&lt;/summary&gt;
+    &lt;Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "2.0.0.0"), _
+     Global.System.ComponentModel.DesignerCategoryAttribute("code"), _
+     Global.System.ComponentModel.ToolboxItem(True), _
+     Global.System.ComponentModel.DataObjectAttribute(True), _
+     Global.System.ComponentModel.DesignerAttribute("Microsoft.VSDesigner.DataSource.Design.TableAdapterDesigner, Microsoft.VSDesigner" &amp; _
+        ", Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"), _
+     Global.System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")&gt; _
+    Partial Public Class &lt;&lt;!proc!&gt;&gt;TableAdapter
+        Inherits Global.System.ComponentModel.Component
+
+        Private WithEvents _adapter As Global.System.Data.SqlClient.SqlDataAdapter
+
+        Private _connection As Global.System.Data.SqlClient.SqlConnection
+
+        Private _transaction As Global.System.Data.SqlClient.SqlTransaction
+
+        Private _commandCollection() As Global.System.Data.SqlClient.SqlCommand
+
+        Private _clearBeforeFill As Boolean
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Sub New()
+            MyBase.New()
+            Me.ClearBeforeFill = True
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Friend ReadOnly Property Adapter() As Global.System.Data.SqlClient.SqlDataAdapter
+            Get
+                If (Me._adapter Is Nothing) Then
+                    Me.InitAdapter()
+                End If
+                Return Me._adapter
+            End Get
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Friend Property Connection() As Global.System.Data.SqlClient.SqlConnection
+            Get
+                If (Me._connection Is Nothing) Then
+                    Me.InitConnection()
+                End If
+                Return Me._connection
+            End Get
+            Set(ByVal value As Global.System.Data.SqlClient.SqlConnection)
+                Me._connection = value
+                If (Not (Me.Adapter.InsertCommand) Is Nothing) Then
+                    Me.Adapter.InsertCommand.Connection = value
+                End If
+                If (Not (Me.Adapter.DeleteCommand) Is Nothing) Then
+                    Me.Adapter.DeleteCommand.Connection = value
+                End If
+                If (Not (Me.Adapter.UpdateCommand) Is Nothing) Then
+                    Me.Adapter.UpdateCommand.Connection = value
+                End If
+                Dim i As Integer = 0
+                Do While (i &lt; Me.CommandCollection.Length)
+                    If (Not (Me.CommandCollection(i)) Is Nothing) Then
+                        CType(Me.CommandCollection(i), Global.System.Data.SqlClient.SqlCommand).Connection = value
+                    End If
+                    i = (i + 1)
+                Loop
+            End Set
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Friend Property Transaction() As Global.System.Data.SqlClient.SqlTransaction
+            Get
+                Return Me._transaction
+            End Get
+            Set(ByVal value As Global.System.Data.SqlClient.SqlTransaction)
+                Me._transaction = value
+                Dim i As Integer = 0
+                Do While (i &lt; Me.CommandCollection.Length)
+                    Me.CommandCollection(i).Transaction = Me._transaction
+                    i = (i + 1)
+                Loop
+                If ((Not (Me.Adapter) Is Nothing) _
+                            AndAlso (Not (Me.Adapter.DeleteCommand) Is Nothing)) Then
+                    Me.Adapter.DeleteCommand.Transaction = Me._transaction
+                End If
+                If ((Not (Me.Adapter) Is Nothing) _
+                            AndAlso (Not (Me.Adapter.InsertCommand) Is Nothing)) Then
+                    Me.Adapter.InsertCommand.Transaction = Me._transaction
+                End If
+                If ((Not (Me.Adapter) Is Nothing) _
+                            AndAlso (Not (Me.Adapter.UpdateCommand) Is Nothing)) Then
+                    Me.Adapter.UpdateCommand.Transaction = Me._transaction
+                End If
+            End Set
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected ReadOnly Property CommandCollection() As Global.System.Data.SqlClient.SqlCommand()
+            Get
+                If (Me._commandCollection Is Nothing) Then
+                    Me.InitCommandCollection()
+                End If
+                Return Me._commandCollection
+            End Get
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Property ClearBeforeFill() As Boolean
+            Get
+                Return Me._clearBeforeFill
+            End Get
+            Set(ByVal value As Boolean)
+                Me._clearBeforeFill = value
+            End Set
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Private Sub InitAdapter()
+            Me._adapter = New Global.System.Data.SqlClient.SqlDataAdapter
+            Dim tableMapping As Global.System.Data.Common.DataTableMapping = New Global.System.Data.Common.DataTableMapping
+            tableMapping.SourceTable = "Table"
+            tableMapping.DataSetTable = "&lt;&lt;!proc!&gt;&gt;"
+&lt;&lt;!for column col in proc!&gt;&gt;
+            tableMapping.ColumnMappings.Add("&lt;&lt;!col!&gt;&gt;", "&lt;&lt;!col!&gt;&gt;")
+&lt;&lt;!end!&gt;&gt;
+            Me._adapter.TableMappings.Add(tableMapping)
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Private Sub InitConnection()
+            Me._connection = New Global.System.Data.SqlClient.SqlConnection
+            Me._connection.ConnectionString = Global.Test.My.MySettings.Default.JanusConnectionString
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Private Sub InitCommandCollection()
+            Me._commandCollection = New Global.System.Data.SqlClient.SqlCommand(0) {}
+            Me._commandCollection(0) = New Global.System.Data.SqlClient.SqlCommand
+            Me._commandCollection(0).Connection = Me.Connection
+            Me._commandCollection(0).CommandText = "dbo.&lt;&lt;!proc!&gt;&gt;"
+            Me._commandCollection(0).CommandType = Global.System.Data.CommandType.StoredProcedure
+            Me._commandCollection(0).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.Int, 4, Global.System.Data.ParameterDirection.ReturnValue, 10, 0, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!for param par in proc!&gt;&gt;
+&lt;&lt;!if par.sqltype = "int"!&gt;&gt;
+            Me._commandCollection(0).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!par!&gt;&gt;", Global.System.Data.SqlDbType.Int, &lt;&lt;!if par.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if par.isinmode = true!&gt;&gt;Input&lt;&lt;!elseif par.isoutmode = true!&gt;&gt;Output&lt;&lt;!elseif par.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif par.sqltype = "varchar"!&gt;&gt;
+            Me._commandCollection(0).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!par!&gt;&gt;", Global.System.Data.SqlDbType.VarChar, &lt;&lt;!if par.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if par.isinmode = true!&gt;&gt;Input&lt;&lt;!elseif par.isoutmode = true!&gt;&gt;Output&lt;&lt;!elseif par.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif par.sqltype = "nvarchar"!&gt;&gt;
+            Me._commandCollection(0).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!par!&gt;&gt;", Global.System.Data.SqlDbType.NVarChar, &lt;&lt;!if par.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if par.isinmode = true!&gt;&gt;Input&lt;&lt;!elseif par.isoutmode = true!&gt;&gt;Output&lt;&lt;!elseif par.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif par.sqltype = "bit"!&gt;&gt;
+            Me._commandCollection(0).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!par!&gt;&gt;", Global.System.Data.SqlDbType.Bit, &lt;&lt;!if par.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if par.isinmode = true!&gt;&gt;Input&lt;&lt;!elseif par.isoutmode = true!&gt;&gt;Output&lt;&lt;!elseif par.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif par.sqltype = "Money" or par.sqltype = "Decimal"!&gt;&gt;
+            Me._commandCollection(0).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!par!&gt;&gt;", Global.System.Data.SqlDbType.Decimal, &lt;&lt;!if par.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if par.isinmode = true!&gt;&gt;Input&lt;&lt;!elseif par.isoutmode = true!&gt;&gt;Output&lt;&lt;!elseif par.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif par.sqltype = "Double" or par.sqltype = "Float"!&gt;&gt;
+            Me._commandCollection(0).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!par!&gt;&gt;", Global.System.Data.SqlDbType.Float, &lt;&lt;!if par.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if par.isinmode = true!&gt;&gt;Input&lt;&lt;!elseif par.isoutmode = true!&gt;&gt;Output&lt;&lt;!elseif par.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif par.sqltype = "date"!&gt;&gt;
+            Me._commandCollection(0).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!par!&gt;&gt;", Global.System.Data.SqlDbType.Date, &lt;&lt;!if par.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if par.isinmode = true!&gt;&gt;Input&lt;&lt;!elseif par.isoutmode = true!&gt;&gt;Output&lt;&lt;!elseif par.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif par.sqltype = "datetime"!&gt;&gt;
+            Me._commandCollection(0).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!par!&gt;&gt;", Global.System.Data.SqlDbType.DateTime, &lt;&lt;!if par.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if par.isinmode = true!&gt;&gt;Input&lt;&lt;!elseif par.isoutmode = true!&gt;&gt;Output&lt;&lt;!elseif par.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!else!&gt;&gt;
+            Me._commandCollection(0).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!par!&gt;&gt;", Global.System.Data.SqlDbType.VarChar, &lt;&lt;!if par.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if par.isinmode = true!&gt;&gt;Input&lt;&lt;!elseif par.isoutmode = true!&gt;&gt;Output&lt;&lt;!elseif par.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if par.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
+         Global.System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter"), _
+         Global.System.ComponentModel.DataObjectMethodAttribute(Global.System.ComponentModel.DataObjectMethodType.Fill, True)&gt; _
+        Public Overridable Overloads Function Fill(ByVal dataTable As QueriesAdaptor.&lt;&lt;!proc!&gt;&gt;DataTable, &lt;&lt;!for param par in proc!&gt;&gt;ByVal &lt;&lt;!par.replace("@","")!&gt;&gt; As &lt;&lt;!if par.vbtype = "Integer" or par.vbtype = "Boolean" or par.vbtype = "Decimal" or par.vbtype = "Double" or par.vbtype = "Date" or par.vbtype = "DateTime"!&gt;&gt;Global.System.Nullable(Of &lt;&lt;!par.vbtype!&gt;&gt;)&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.vbtype!&gt;&gt;&lt;&lt;!end!&gt;&gt;&lt;&lt;!if par.listpos &lt; par.listcount!&gt;&gt;, &lt;&lt;!end!&gt;&gt;&lt;&lt;!end!&gt;&gt;) As Integer
+            Me.Adapter.SelectCommand = Me.CommandCollection(0)
+&lt;&lt;!for param par in proc!&gt;&gt;
+&lt;&lt;!if par.vbtype = "Integer" or par.vbtype = "Boolean" or par.vbtype = "Decimal" or par.vbtype = "Double" or par.vbtype = "Date" or par.vbtype = "DateTime"!&gt;&gt;
+            If (&lt;&lt;!par.replace("@","")!&gt;&gt;.HasValue = True) Then
+                Me.Adapter.SelectCommand.Parameters(&lt;&lt;!par.listpos!&gt;&gt;).Value = CType(&lt;&lt;!par.replace("@","")!&gt;&gt;.Value, &lt;&lt;!par.vbtype!&gt;&gt;)
+            Else
+                Me.Adapter.SelectCommand.Parameters(&lt;&lt;!par.listpos!&gt;&gt;).Value = Global.System.DBNull.Value
+            End If
+&lt;&lt;!else!&gt;&gt;
+            If (&lt;&lt;!par.replace("@","")!&gt;&gt; Is Nothing) Then
+                Me.Adapter.SelectCommand.Parameters(&lt;&lt;!par.listpos!&gt;&gt;).Value = Global.System.DBNull.Value
+            Else
+                Me.Adapter.SelectCommand.Parameters(&lt;&lt;!par.listpos!&gt;&gt;).Value = CType(&lt;&lt;!par.replace("@","")!&gt;&gt;, &lt;&lt;!par.vbtype!&gt;&gt;)
+            End If
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+            If (Me.ClearBeforeFill = True) Then
+                dataTable.Clear()
+            End If
+            Dim returnValue As Integer = Me.Adapter.Fill(dataTable)
+            Return returnValue
+        End Function
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
+         Global.System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter"), _
+         Global.System.ComponentModel.DataObjectMethodAttribute(Global.System.ComponentModel.DataObjectMethodType.[Select], True)&gt; _
+        Public Overridable Overloads Function GetData(&lt;&lt;!for param par in proc!&gt;&gt;ByVal &lt;&lt;!par.replace("@","")!&gt;&gt; As &lt;&lt;!if par.vbtype = "Integer" or par.vbtype = "Boolean" or par.vbtype = "Decimal" or par.vbtype = "Double" or par.vbtype = "Date" or par.vbtype = "DateTime"!&gt;&gt;Global.System.Nullable(Of &lt;&lt;!par.vbtype!&gt;&gt;)&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.vbtype!&gt;&gt;&lt;&lt;!end!&gt;&gt;&lt;&lt;!if par.listpos &lt; par.listcount!&gt;&gt;, &lt;&lt;!end!&gt;&gt;&lt;&lt;!end!&gt;&gt;) As QueriesAdaptor.&lt;&lt;!proc!&gt;&gt;DataTable
+            Me.Adapter.SelectCommand = Me.CommandCollection(0)
+&lt;&lt;!for param par in proc!&gt;&gt;
+&lt;&lt;!if par.vbtype = "Integer" or par.vbtype = "Boolean" or par.vbtype = "Decimal" or par.vbtype = "Double" or par.vbtype = "Date" or par.vbtype = "DateTime"!&gt;&gt;
+            If (&lt;&lt;!par.replace("@","")!&gt;&gt;.HasValue = True) Then
+                Me.Adapter.SelectCommand.Parameters(&lt;&lt;!par.listpos!&gt;&gt;).Value = CType(&lt;&lt;!par.replace("@","")!&gt;&gt;.Value, &lt;&lt;!par.vbtype!&gt;&gt;)
+            Else
+                Me.Adapter.SelectCommand.Parameters(&lt;&lt;!par.listpos!&gt;&gt;).Value = Global.System.DBNull.Value
+            End If
+&lt;&lt;!else!&gt;&gt;
+            If (&lt;&lt;!par.replace("@","")!&gt;&gt; Is Nothing) Then
+                Me.Adapter.SelectCommand.Parameters(&lt;&lt;!par.listpos!&gt;&gt;).Value = Global.System.DBNull.Value
+            Else
+                Me.Adapter.SelectCommand.Parameters(&lt;&lt;!par.listpos!&gt;&gt;).Value = CType(&lt;&lt;!par.replace("@","")!&gt;&gt;, &lt;&lt;!par.vbtype!&gt;&gt;)
+            End If
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+            Dim dataTable As QueriesAdaptor.&lt;&lt;!proc!&gt;&gt;DataTable = New QueriesAdaptor.&lt;&lt;!proc!&gt;&gt;DataTable
+            Me.Adapter.Fill(dataTable)
+            Return dataTable
+        End Function
+    End Class
+&lt;&lt;!else
+    set nonqueryneeded = true!&gt;&gt;
+&lt;&lt;!end!&gt;&gt;
+
+&lt;&lt;!end!&gt;&gt;
+&lt;&lt;!if nonqueryneeded = true!&gt;&gt;
+    '''&lt;summary&gt;
+    '''Represents the connection and commands used to retrieve and save data.
+    '''&lt;/summary&gt;
+    &lt;Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "2.0.0.0"), _
+     Global.System.ComponentModel.DesignerCategoryAttribute("code"), _
+     Global.System.ComponentModel.ToolboxItem(True), _
+     Global.System.ComponentModel.DataObjectAttribute(True), _
+     Global.System.ComponentModel.DesignerAttribute("Microsoft.VSDesigner.DataSource.Design.TableAdapterDesigner, Microsoft.VSDesigner" &amp; _
+        ", Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"), _
+     Global.System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")&gt; _
+    Partial Public Class QueriesTableAdapter
+        Inherits Global.System.ComponentModel.Component
+
+        Private _commandCollection() As Global.System.Data.IDbCommand
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected ReadOnly Property CommandCollection() As Global.System.Data.IDbCommand()
+            Get
+                If (Me._commandCollection Is Nothing) Then
+                    Me.InitCommandCollection()
+                End If
+                Return Me._commandCollection
+            End Get
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Private Sub InitCommandCollection()
+&lt;&lt;!//Get query count
+   set noquerycount = -1
+   for procedure proc in conn
+   if proc.columncount = 0
+   set noquerycount = noquerycount + 1
+   end
+   end
+   //Start looping
+   set ProcCount = -1
+   for procedure proc in conn
+   if proc.columncount = 0
+   set ProcCount = ProcCount + 1!&gt;&gt;
+        &lt;&lt;!if proc.listpos = 1!&gt;&gt;
+            Me._commandCollection = New Global.System.Data.IDbCommand(&lt;&lt;!noquerycount!&gt;&gt;) {}
+        &lt;&lt;!end!&gt;&gt;
+            Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;) = New Global.System.Data.SqlClient.SqlCommand
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Connection = New Global.System.Data.SqlClient.SqlConnection(Global.Test.My.MySettings.Default.JanusConnectionString)
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).CommandText = "dbo.&lt;&lt;!proc!&gt;&gt;"
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).CommandType = Global.System.Data.CommandType.StoredProcedure
+        &lt;&lt;!for param prm in proc!&gt;&gt;
+        &lt;&lt;!if prm.listpos = 1!&gt;&gt;
+&lt;&lt;!if prm.sqltype = "int"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.Int, &lt;&lt;!if prm.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.ReturnValue, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Int, &lt;&lt;!if prm.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "xml"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.Xml, 2147483647, Global.System.Data.ParameterDirection.ReturnValue, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Xml, 2147483647, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "varchar"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.VarChar, &lt;&lt;!if prm.length = -1!&gt;&gt;2147483647&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.ReturnValue, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.VarChar, &lt;&lt;!if prm.length = -1!&gt;&gt;2147483647&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "nvarchar"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.NVarChar, &lt;&lt;!if prm.length = -1!&gt;&gt;2147483647&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.ReturnValue, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.NVarChar, &lt;&lt;!if prm.length = -1!&gt;&gt;2147483647&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "Boolean"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.Bit, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.ReturnValue, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Bit, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "money" or prm.sqltype = "decimal"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.Decimal, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.ReturnValue, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Decimal, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "float" or prm.sqltype = "double"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.Float, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.ReturnValue, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Float, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "date"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.Date, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.ReturnValue, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Date, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "datetime"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.DateTime, 8, Global.System.Data.ParameterDirection.ReturnValue, 23, 3, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.DateTime, 8, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, 23, 3, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!else!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("@RETURN_VALUE", Global.System.Data.SqlDbType.VarChar, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.ReturnValue, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.VarChar, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!end!&gt;&gt;
+        &lt;&lt;!else!&gt;&gt;
+&lt;&lt;!if prm.sqltype = "int"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Int, &lt;&lt;!if prm.length = -1!&gt;&gt;4&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "xml"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Xml, 2147483647, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "varchar"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.VarChar, &lt;&lt;!if prm.length = -1!&gt;&gt;2147483647&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "nvarchar"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.NVarChar, &lt;&lt;!if prm.length = -1!&gt;&gt;2147483647&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.length!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "bit"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Bit, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "money" or prm.sqltype = "decimal"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Decimal, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "float" or prm.sqltype = "double"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Float, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "date"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.Date, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!elseif prm.sqltype = "datetime"!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.DateTime, 8, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, 23, 3, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!else!&gt;&gt;
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Parameters.Add(New Global.System.Data.SqlClient.SqlParameter("&lt;&lt;!prm!&gt;&gt;", Global.System.Data.SqlDbType.VarChar, &lt;&lt;!prm.length!&gt;&gt;, Global.System.Data.ParameterDirection.&lt;&lt;!if prm.isinoutmode = true!&gt;&gt;InputOutput&lt;&lt;!else!&gt;&gt;Input&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.precision = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.precision!&gt;&gt;&lt;&lt;!end!&gt;&gt;, &lt;&lt;!if prm.scale = -1!&gt;&gt;0&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.scale!&gt;&gt;&lt;&lt;!end!&gt;&gt;, Nothing, Global.System.Data.DataRowVersion.Current, False, Nothing, "", "", ""))
+&lt;&lt;!end!&gt;&gt;
+        &lt;&lt;!end!&gt;&gt;
+        &lt;&lt;!end!&gt;&gt;
+    &lt;&lt;!end!&gt;&gt;
+    &lt;&lt;!end!&gt;&gt;
+        End Sub
+
+    &lt;&lt;!set ProcCount = -1
+       for procedure proc in conn
+       if proc.columncount = 0
+       set ProcCount = ProcCount + 1!&gt;&gt;
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
+         Global.System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")&gt; _
+        Public Overridable Overloads Function &lt;&lt;!proc!&gt;&gt;(&lt;&lt;!for param prm in proc!&gt;&gt;ByVal &lt;&lt;!prm.replace("@","")!&gt;&gt; As &lt;&lt;!if prm.sqltype = "int" or prm.sqltype = "bit" or prm.sqltype = "money" or prm.sqltype = "decimal" or prm.sqltype = "float" or prm.sqltype = "double" or prm.sqltype = "date" or prm.sqltype = "datetime"!&gt;&gt;Global.System.Nullable(Of &lt;&lt;!prm.vbtype!&gt;&gt;)&lt;&lt;!else!&gt;&gt;&lt;&lt;!prm.vbtype!&gt;&gt;&lt;&lt;!end!&gt;&gt;&lt;&lt;!if prm.listpos &lt; prm.listcount!&gt;&gt;, &lt;&lt;!end!&gt;&gt;&lt;&lt;!end!&gt;&gt;) As Integer
+            Dim command As Global.System.Data.SqlClient.SqlCommand = CType(Me.CommandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand)
+          &lt;&lt;!for param prm in proc!&gt;&gt;
+              &lt;&lt;!if prm.sqltype = "int" or prm.sqltype = "bit" or prm.sqltype = "money" or prm.sqltype = "decimal" or prm.sqltype = "float" or prm.sqltype = "double" or prm.sqltype = "date" or prm.sqltype = "datetime"!&gt;&gt;
+            If (&lt;&lt;!prm.replace("@","")!&gt;&gt;.HasValue = True) Then
+                command.Parameters(&lt;&lt;!prm.listpos!&gt;&gt;).Value = CType(&lt;&lt;!prm.replace("@","")!&gt;&gt;.Value, &lt;&lt;!prm.vbtype!&gt;&gt;)
+            Else
+                command.Parameters(&lt;&lt;!prm.listpos!&gt;&gt;).Value = Global.System.DBNull.Value
+            End If
+              &lt;&lt;!else!&gt;&gt;
+            If (&lt;&lt;!prm.replace("@","")!&gt;&gt; Is Nothing) Then
+                command.Parameters(&lt;&lt;!prm.listpos!&gt;&gt;).Value = Global.System.DBNull.Value
+            Else
+                command.Parameters(&lt;&lt;!prm.listpos!&gt;&gt;).Value = CType(&lt;&lt;!prm.replace("@","")!&gt;&gt;, &lt;&lt;!prm.vbtype!&gt;&gt;)
+            End If
+              &lt;&lt;!end!&gt;&gt;
+          &lt;&lt;!end!&gt;&gt;
+            Dim previousConnectionState As Global.System.Data.ConnectionState = command.Connection.State
+            If ((command.Connection.State And Global.System.Data.ConnectionState.Open) _
+                        &lt;&gt; Global.System.Data.ConnectionState.Open) Then
+                command.Connection.Open()
+            End If
+            Dim returnValue As Integer
+            Try
+                returnValue = command.ExecuteNonQuery
+            Finally
+                If (previousConnectionState = Global.System.Data.ConnectionState.Closed) Then
+                    command.Connection.Close()
+                End If
+            End Try
+            &lt;&lt;!for param prm in proc!&gt;&gt;
+            &lt;&lt;!if prm.isinoutmode = true!&gt;&gt;
+            If ((command.Parameters(&lt;&lt;!prm.listpos!&gt;&gt;).Value Is Nothing) _
+                        OrElse (command.Parameters(&lt;&lt;!prm.listpos!&gt;&gt;).Value.GetType Is GetType(Global.System.DBNull))) Then
+                ID = New Global.System.Nullable(Of Integer)
+            Else
+                ID = New Global.System.Nullable(Of Integer)(CType(command.Parameters(&lt;&lt;!prm.listpos!&gt;&gt;).Value, Integer))
+            End If
+            &lt;&lt;!end!&gt;&gt;
+            &lt;&lt;!end!&gt;&gt;
+            Return returnValue
+        End Function
+
+    &lt;&lt;!end!&gt;&gt;
+    &lt;&lt;!end!&gt;&gt;
+    End Class
+    
+&lt;&lt;!end!&gt;&gt;
+    '''&lt;summary&gt;
+    '''TableAdapterManager is used to coordinate TableAdapters in the dataset to enable Hierarchical Update scenarios
+    '''&lt;/summary&gt;
+    &lt;Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "2.0.0.0"), _
+     Global.System.ComponentModel.DesignerCategoryAttribute("code"), _
+     Global.System.ComponentModel.ToolboxItem(True), _
+     Global.System.ComponentModel.DesignerAttribute("Microsoft.VSDesigner.DataSource.Design.TableAdapterManagerDesigner, Microsoft.VSD" &amp; _
+        "esigner, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"), _
+     Global.System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapterManager")&gt; _
+    Partial Public Class TableAdapterManager
+        Inherits Global.System.ComponentModel.Component
+
+        Private _updateOrder As UpdateOrderOption
+
+        Private _backupDataSetBeforeUpdate As Boolean
+
+        Private _connection As Global.System.Data.IDbConnection
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Property UpdateOrder() As UpdateOrderOption
+            Get
+                Return Me._updateOrder
+            End Get
+            Set(ByVal value As UpdateOrderOption)
+                Me._updateOrder = value
+            End Set
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Property BackupDataSetBeforeUpdate() As Boolean
+            Get
+                Return Me._backupDataSetBeforeUpdate
+            End Get
+            Set(ByVal value As Boolean)
+                Me._backupDataSetBeforeUpdate = value
+            End Set
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
+         Global.System.ComponentModel.Browsable(False)&gt; _
+        Public Property Connection() As Global.System.Data.IDbConnection
+            Get
+                If (Not (Me._connection) Is Nothing) Then
+                    Return Me._connection
+                End If
+                Return Nothing
+            End Get
+            Set(ByVal value As Global.System.Data.IDbConnection)
+                Me._connection = value
+            End Set
+        End Property
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
+         Global.System.ComponentModel.Browsable(False)&gt; _
+        Public ReadOnly Property TableAdapterInstanceCount() As Integer
+            Get
+                Dim count As Integer = 0
+                Return count
+            End Get
+        End Property
+
+        '''&lt;summary&gt;
+        '''Update rows in top-down order.
+        '''&lt;/summary&gt;
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Private Function UpdateUpdatedRows(ByVal dataSet As QueriesAdaptor, ByVal allChangedRows As Global.System.Collections.Generic.List(Of Global.System.Data.DataRow), ByVal allAddedRows As Global.System.Collections.Generic.List(Of Global.System.Data.DataRow)) As Integer
+            Dim result As Integer = 0
+            Return result
+        End Function
+
+        '''&lt;summary&gt;
+        '''Insert rows in top-down order.
+        '''&lt;/summary&gt;
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Private Function UpdateInsertedRows(ByVal dataSet As QueriesAdaptor, ByVal allAddedRows As Global.System.Collections.Generic.List(Of Global.System.Data.DataRow)) As Integer
+            Dim result As Integer = 0
+            Return result
+        End Function
+
+        '''&lt;summary&gt;
+        '''Delete rows in bottom-up order.
+        '''&lt;/summary&gt;
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Private Function UpdateDeletedRows(ByVal dataSet As QueriesAdaptor, ByVal allChangedRows As Global.System.Collections.Generic.List(Of Global.System.Data.DataRow)) As Integer
+            Dim result As Integer = 0
+            Return result
+        End Function
+
+        '''&lt;summary&gt;
+        '''Remove inserted rows that become updated rows after calling TableAdapter.Update(inserted rows) first
+        '''&lt;/summary&gt;
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Private Function GetRealUpdatedRows(ByVal updatedRows() As Global.System.Data.DataRow, ByVal allAddedRows As Global.System.Collections.Generic.List(Of Global.System.Data.DataRow)) As Global.System.Data.DataRow()
+            If ((updatedRows Is Nothing) _
+                        OrElse (updatedRows.Length &lt; 1)) Then
+                Return updatedRows
+            End If
+            If ((allAddedRows Is Nothing) _
+                        OrElse (allAddedRows.Count &lt; 1)) Then
+                Return updatedRows
+            End If
+            Dim realUpdatedRows As Global.System.Collections.Generic.List(Of Global.System.Data.DataRow) = New Global.System.Collections.Generic.List(Of Global.System.Data.DataRow)
+            Dim i As Integer = 0
+            Do While (i &lt; updatedRows.Length)
+                Dim row As Global.System.Data.DataRow = updatedRows(i)
+                If (allAddedRows.Contains(row) = False) Then
+                    realUpdatedRows.Add(row)
+                End If
+                i = (i + 1)
+            Loop
+            Return realUpdatedRows.ToArray
+        End Function
+
+        '''&lt;summary&gt;
+        '''Update all changes to the dataset.
+        '''&lt;/summary&gt;
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Public Overridable Function UpdateAll(ByVal dataSet As QueriesAdaptor) As Integer
+            If (dataSet Is Nothing) Then
+                Throw New Global.System.ArgumentNullException("dataSet")
+            End If
+            If (dataSet.HasChanges = False) Then
+                Return 0
+            End If
+            Dim workConnection As Global.System.Data.IDbConnection = Me.Connection
+            If (workConnection Is Nothing) Then
+                Throw New Global.System.ApplicationException("TableAdapterManager contains no connection information. Set each TableAdapterMana" &amp; _
+                        "ger TableAdapter property to a valid TableAdapter instance.")
+            End If
+            Dim workConnOpened As Boolean = False
+            If ((workConnection.State And Global.System.Data.ConnectionState.Broken) _
+                        = Global.System.Data.ConnectionState.Broken) Then
+                workConnection.Close()
+            End If
+            If (workConnection.State = Global.System.Data.ConnectionState.Closed) Then
+                workConnection.Open()
+                workConnOpened = True
+            End If
+            Dim workTransaction As Global.System.Data.IDbTransaction = workConnection.BeginTransaction
+            If (workTransaction Is Nothing) Then
+                Throw New Global.System.ApplicationException("The transaction cannot begin. The current data connection does not support transa" &amp; _
+                        "ctions or the current state is not allowing the transaction to begin.")
+            End If
+            Dim allChangedRows As Global.System.Collections.Generic.List(Of Global.System.Data.DataRow) = New Global.System.Collections.Generic.List(Of Global.System.Data.DataRow)
+            Dim allAddedRows As Global.System.Collections.Generic.List(Of Global.System.Data.DataRow) = New Global.System.Collections.Generic.List(Of Global.System.Data.DataRow)
+            Dim adaptersWithAcceptChangesDuringUpdate As Global.System.Collections.Generic.List(Of Global.System.Data.Common.DataAdapter) = New Global.System.Collections.Generic.List(Of Global.System.Data.Common.DataAdapter)
+            Dim revertConnections As Global.System.Collections.Generic.Dictionary(Of Object, Global.System.Data.IDbConnection) = New Global.System.Collections.Generic.Dictionary(Of Object, Global.System.Data.IDbConnection)
+            Dim result As Integer = 0
+            Dim backupDataSet As Global.System.Data.DataSet = Nothing
+            If Me.BackupDataSetBeforeUpdate Then
+                backupDataSet = New Global.System.Data.DataSet
+                backupDataSet.Merge(dataSet)
+            End If
+            Try
+                '---- Prepare for update -----------
+                '
+                '
+                '---- Perform updates -----------
+                '
+                If (Me.UpdateOrder = UpdateOrderOption.UpdateInsertDelete) Then
+                    result = (result + Me.UpdateUpdatedRows(dataSet, allChangedRows, allAddedRows))
+                    result = (result + Me.UpdateInsertedRows(dataSet, allAddedRows))
+                Else
+                    result = (result + Me.UpdateInsertedRows(dataSet, allAddedRows))
+                    result = (result + Me.UpdateUpdatedRows(dataSet, allChangedRows, allAddedRows))
+                End If
+                result = (result + Me.UpdateDeletedRows(dataSet, allChangedRows))
+                '
+                '---- Commit updates -----------
+                '
+                workTransaction.Commit()
+                If (0 &lt; allAddedRows.Count) Then
+                    Dim rows((allAddedRows.Count) - 1) As Global.System.Data.DataRow
+                    allAddedRows.CopyTo(rows)
+                    Dim i As Integer = 0
+                    Do While (i &lt; rows.Length)
+                        Dim row As Global.System.Data.DataRow = rows(i)
+                        row.AcceptChanges()
+                        i = (i + 1)
+                    Loop
+                End If
+                If (0 &lt; allChangedRows.Count) Then
+                    Dim rows((allChangedRows.Count) - 1) As Global.System.Data.DataRow
+                    allChangedRows.CopyTo(rows)
+                    Dim i As Integer = 0
+                    Do While (i &lt; rows.Length)
+                        Dim row As Global.System.Data.DataRow = rows(i)
+                        row.AcceptChanges()
+                        i = (i + 1)
+                    Loop
+                End If
+            Catch ex As Global.System.Exception
+                workTransaction.Rollback()
+                '---- Restore the dataset -----------
+                If Me.BackupDataSetBeforeUpdate Then
+                    Global.System.Diagnostics.Debug.Assert((Not (backupDataSet) Is Nothing))
+                    dataSet.Clear()
+                    dataSet.Merge(backupDataSet)
+                Else
+                    If (0 &lt; allAddedRows.Count) Then
+                        Dim rows((allAddedRows.Count) - 1) As Global.System.Data.DataRow
+                        allAddedRows.CopyTo(rows)
+                        Dim i As Integer = 0
+                        Do While (i &lt; rows.Length)
+                            Dim row As Global.System.Data.DataRow = rows(i)
+                            row.AcceptChanges()
+                            row.SetAdded()
+                            i = (i + 1)
+                        Loop
+                    End If
+                End If
+                Throw ex
+            Finally
+                If workConnOpened Then
+                    workConnection.Close()
+                End If
+                If (0 &lt; adaptersWithAcceptChangesDuringUpdate.Count) Then
+                    Dim adapters((adaptersWithAcceptChangesDuringUpdate.Count) - 1) As Global.System.Data.Common.DataAdapter
+                    adaptersWithAcceptChangesDuringUpdate.CopyTo(adapters)
+                    Dim i As Integer = 0
+                    Do While (i &lt; adapters.Length)
+                        Dim adapter As Global.System.Data.Common.DataAdapter = adapters(i)
+                        adapter.AcceptChangesDuringUpdate = True
+                        i = (i + 1)
+                    Loop
+                End If
+            End Try
+            Return result
+        End Function
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Overridable Sub SortSelfReferenceRows(ByVal rows() As Global.System.Data.DataRow, ByVal relation As Global.System.Data.DataRelation, ByVal childFirst As Boolean)
+            Global.System.Array.Sort(Of Global.System.Data.DataRow)(rows, New SelfReferenceComparer(relation, childFirst))
+        End Sub
+
+        &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+        Protected Overridable Function MatchTableAdapterConnection(ByVal inputConnection As Global.System.Data.IDbConnection) As Boolean
+            If (Not (Me._connection) Is Nothing) Then
+                Return True
+            End If
+            If ((Me.Connection Is Nothing) _
+                        OrElse (inputConnection Is Nothing)) Then
+                Return True
+            End If
+            If String.Equals(Me.Connection.ConnectionString, inputConnection.ConnectionString, Global.System.StringComparison.Ordinal) Then
+                Return True
+            End If
+            Return False
+        End Function
+
+        '''&lt;summary&gt;
+        '''Update Order Option
+        '''&lt;/summary&gt;
+        &lt;Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "2.0.0.0")&gt; _
+        Public Enum UpdateOrderOption
+
+            InsertUpdateDelete = 0
+
+            UpdateInsertDelete = 1
+        End Enum
+
+        '''&lt;summary&gt;
+        '''Used to sort self-referenced table's rows
+        '''&lt;/summary&gt;
+        &lt;Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "2.0.0.0")&gt; _
+        Private Class SelfReferenceComparer
+            Inherits Object
+            Implements Global.System.Collections.Generic.IComparer(Of Global.System.Data.DataRow)
+
+            Private _relation As Global.System.Data.DataRelation
+
+            Private _childFirst As Integer
+
+            &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+            Friend Sub New(ByVal relation As Global.System.Data.DataRelation, ByVal childFirst As Boolean)
+                MyBase.New()
+                Me._relation = relation
+                If childFirst Then
+                    Me._childFirst = -1
+                Else
+                    Me._childFirst = 1
+                End If
+            End Sub
+
+            &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+            Private Function IsChildAndParent(ByVal child As Global.System.Data.DataRow, ByVal parent As Global.System.Data.DataRow) As Boolean
+                Global.System.Diagnostics.Debug.Assert((Not (child) Is Nothing))
+                Global.System.Diagnostics.Debug.Assert((Not (parent) Is Nothing))
+                Dim newParent As Global.System.Data.DataRow = child.GetParentRow(Me._relation, Global.System.Data.DataRowVersion.[Default])
+
+                Do While ((Not (newParent) Is Nothing) _
+                            AndAlso ((Object.ReferenceEquals(newParent, child) = False) _
+                            AndAlso (Object.ReferenceEquals(newParent, parent) = False)))
+                    newParent = newParent.GetParentRow(Me._relation, Global.System.Data.DataRowVersion.[Default])
+
+                Loop
+                If (newParent Is Nothing) Then
+                    newParent = child.GetParentRow(Me._relation, Global.System.Data.DataRowVersion.Original)
+                    Do While ((Not (newParent) Is Nothing) _
+                                AndAlso ((Object.ReferenceEquals(newParent, child) = False) _
+                                AndAlso (Object.ReferenceEquals(newParent, parent) = False)))
+                        newParent = newParent.GetParentRow(Me._relation, Global.System.Data.DataRowVersion.Original)
+
+                    Loop
+                End If
+                If Object.ReferenceEquals(newParent, parent) Then
+                    Return True
+                End If
+                Return False
+            End Function
+
+            &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
+            Public Function Compare(ByVal row1 As Global.System.Data.DataRow, ByVal row2 As Global.System.Data.DataRow) As Integer Implements Global.System.Collections.Generic.IComparer(Of Global.System.Data.DataRow).Compare
+                If Object.ReferenceEquals(row1, row2) Then
+                    Return 0
+                End If
+                If (row1 Is Nothing) Then
+                    Return -1
+                End If
+                If (row2 Is Nothing) Then
+                    Return 1
+                End If
+
+                'Is row1 the child or grandchild of row2
+                If Me.IsChildAndParent(row1, row2) Then
+                    Return Me._childFirst
+                End If
+
+                'Is row2 the child or grandchild of row1
+                If Me.IsChildAndParent(row2, row1) Then
+                    Return (-1 * Me._childFirst)
+                End If
+                Return 0
+            End Function
+        End Class
+    End Class
+End Namespace
+</Text>
+        </Template>
+      </Templates>
+      <VBCode />
+      <CSCode />
+    </MDPackage>
+  </Packages>
+  <Bin />
+</MDProject>
