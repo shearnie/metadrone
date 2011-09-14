@@ -408,9 +408,9 @@ end
       <Main>
         <EditorGUID>8d30bbc6-3027-439c-9d96-08f956a28e82</EditorGUID>
         <OwnerGUID>ba9448a0-9acb-4a9a-85ae-c1b8aa8c0055</OwnerGUID>
-        <Text>#safebegin = "-- safe start"
+        <Text>//**** Preprocessors ******
+#safebegin = "-- safe start"
 #safeend = "-- safe end"
-//**** Preprocessors ******
 #ignorecase on  // case sensitivity of string comparisons
 
 call CRUDs(sources.SQL_Server)
