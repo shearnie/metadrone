@@ -32,8 +32,24 @@
     INFORMATION_SCHEMA.COLUMNS.NUMERIC_PRECISION        AS NUMERIC_PRECISION, 
     INFORMATION_SCHEMA.COLUMNS.NUMERIC_SCALE            AS NUMERIC_SCALE, 
     INFORMATION_SCHEMA.COLUMNS.IS_NULLABLE              AS IS_NULLABLE, 
-    ISNULL(ColumnProperty(Object_ID(QuoteName(KEY_COLUMN_USAGE.TABLE_SCHEMA) + '.' + QuoteName(KEY_COLUMN_USAGE.TABLE_NAME)), 
-                                              KEY_COLUMN_USAGE.COLUMN_NAME, 'IsIdentity'), 0) 
+    CASE WHEN 
+		ISNULL(ColumnProperty(Object_ID(QuoteName(KEY_COLUMN_USAGE.TABLE_SCHEMA) + '.' + QuoteName(KEY_COLUMN_USAGE.TABLE_NAME)), 
+												  KEY_COLUMN_USAGE.COLUMN_NAME, 'IsIdentity'), 0) = 1 THEN 
+		1
+	ELSE 
+		(SELECT TOP 1 
+			C.IS_IDENTITY 
+		 FROM 
+			SYS.OBJECTS O 
+		 INNER JOIN 
+			SYS.COLUMNS C ON O.OBJECT_ID = C.OBJECT_ID 
+		 WHERE 
+			O.TYPE = 'U' 
+		 AND 
+			O.NAME = INFORMATION_SCHEMA.COLUMNS.TABLE_NAME
+		AND
+			C.NAME = INFORMATION_SCHEMA.COLUMNS.COLUMN_NAME)
+	END 
                                                         AS IS_IDENTITY, 
     (SELECT TOP 1 INFORMATION_SCHEMA.TABLE_CONSTRAINTS.CONSTRAINT_TYPE 
      FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
@@ -46,7 +62,7 @@
 FROM 
     INFORMATION_SCHEMA.TABLES 
 LEFT JOIN 
-    INFORMATION_SCHEMA.COLUMNS ON INFORMATION_SCHEMA.COLUMNS.TABLE_NAME = INFORMATION_SCHEMA.TABLES.TABLE_NAME 
+    INFORMATION_SCHEMA.COLUMNS ON INFORMATION_SCHEMA.COLUMNS.TABLE_NAME = INFORMATION_SCHEMA.TABLES.TABLE_NAME
 LEFT JOIN 
     INFORMATION_SCHEMA.KEY_COLUMN_USAGE ON INFORMATION_SCHEMA.KEY_COLUMN_USAGE.TABLE_NAME = INFORMATION_SCHEMA.COLUMNS.TABLE_NAME 
     AND 
@@ -78,14 +94,36 @@ FROM
 	INFORMATION_SCHEMA.ROUTINES 
 LEFT JOIN
 	INFORMATION_SCHEMA.PARAMETERS ON INFORMATION_SCHEMA.PARAMETERS.SPECIFIC_NAME = INFORMATION_SCHEMA.ROUTINES.SPECIFIC_NAME
+WHERE
+    ObjectProperty (Object_Id (INFORMATION_SCHEMA.ROUTINES.ROUTINE_NAME), 'IsMSShipped') = 0 AND
+    (SELECT
+		major_id 
+	 FROM
+		SYS.EXTENDED_PROPERTIES
+	 WHERE
+		major_id = object_id(INFORMATION_SCHEMA.ROUTINES.ROUTINE_NAME)
+	 AND
+		minor_id = 0
+	 AND
+		class = 1
+	AND
+		name = N'microsoft_database_tools_support'
+    ) IS NULL
 ORDER BY
 	INFORMATION_SCHEMA.ROUTINES.SPECIFIC_NAME,
 	INFORMATION_SCHEMA.PARAMETERS.ORDINAL_POSITION
 </RoutineSchemaQuery>
-      <Transformations>//Set column property values
-set column.lastpos = column.listpos &lt; column.listcount
+      <Transformations>//Set table property values
+set table.lastpos = table.listpos = table.listcount
+
+//Set column property values
+set column.lastpos = column.listpos = column.listcount
 set column.sqltype = column.datatype
 set column.sqltypefullspec = column.datatype
+set column.vbtype = ""
+set column.cstype = ""
+set column.vbdefval = ""
+set column.csdefval = ""
 
 if column.datatype = "bit"
 	set column.vbtype = "Boolean"
@@ -225,9 +263,14 @@ end
 
 
 //Set parameter property values
-set param.lastpos = column.listpos &lt; column.listcount
+set routine.lastpos = routine.listpos = routine.listcount
+set param.lastpos = column.listpos = column.listcount
 set param.sqltype = param.datatype
 set param.sqltypefullspec = param.datatype
+set param.vbtype = ""
+set param.cstype = ""
+set param.vbdefval = ""
+set param.csdefval = ""
 
 if param.datatype = "bit"
 	set param.vbtype = "Boolean"
