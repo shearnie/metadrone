@@ -1004,11 +1004,11 @@ Partial Public Class QueriesAdaptor
 &lt;&lt;!for column col in proc!&gt;&gt;
 
         &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
-        Public Property &lt;&lt;!col!&gt;&gt;() As &lt;&lt;!col.vbtype!&gt;&gt;
+        Public Property &lt;&lt;!col!&gt;&gt;() As &lt;&lt;!if (col.vbtype = "Integer" or col.vbtype = "Boolean" or col.vbtype = "Decimal" or col.vbtype = "Double" or col.vbtype = "Date" or col.vbtype = "DateTime") and col.nullable!&gt;&gt;Global.System.Nullable(Of &lt;&lt;!col.vbtype!&gt;&gt;)&lt;&lt;!else!&gt;&gt;&lt;&lt;!col.vbtype!&gt;&gt;&lt;&lt;!end!&gt;&gt;
             Get
                 Return CType(Me(Me.table&lt;&lt;!proc!&gt;&gt;.&lt;&lt;!col!&gt;&gt;Column), &lt;&lt;!col.vbtype!&gt;&gt;)
             End Get
-            Set(ByVal value As &lt;&lt;!col.vbtype!&gt;&gt;)
+            Set(ByVal value As &lt;&lt;!if (col.vbtype = "Integer" or col.vbtype = "Boolean" or col.vbtype = "Decimal" or col.vbtype = "Double" or col.vbtype = "Date" or col.vbtype = "DateTime") and col.nullable!&gt;&gt;Global.System.Nullable(Of &lt;&lt;!col.vbtype!&gt;&gt;)&lt;&lt;!else!&gt;&gt;&lt;&lt;!col.vbtype!&gt;&gt;&lt;&lt;!end!&gt;&gt;)
                 Me(Me.table&lt;&lt;!proc!&gt;&gt;.&lt;&lt;!col!&gt;&gt;Column) = value
             End Set
         End Property
