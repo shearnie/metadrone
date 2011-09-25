@@ -423,6 +423,8 @@ end
 #safebegin = "' safe start"
 #safeend = "' safe end"
 
+set connstrvar = "Global.Missus.Data.My.MySettings.Default.MissusConnectionString"
+
 call QueriesAdaptor(sources.Source)
 </Text>
       </Main>
@@ -1189,7 +1191,7 @@ Namespace QueriesAdaptorTableAdapters
         &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
         Private Sub InitConnection()
             Me._connection = New Global.System.Data.SqlClient.SqlConnection
-            Me._connection.ConnectionString = Global.Test.My.MySettings.Default.JanusConnectionString
+            Me._connection.ConnectionString = &lt;&lt;!connstrvar!&gt;&gt;
         End Sub
 
         &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute()&gt; _
@@ -1226,7 +1228,7 @@ Namespace QueriesAdaptorTableAdapters
         &lt;Global.System.Diagnostics.DebuggerNonUserCodeAttribute(), _
          Global.System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter"), _
          Global.System.ComponentModel.DataObjectMethodAttribute(Global.System.ComponentModel.DataObjectMethodType.Fill, True)&gt; _
-        Public Overridable Overloads Function Fill(ByVal dataTable As QueriesAdaptor.&lt;&lt;!proc!&gt;&gt;DataTable, &lt;&lt;!for param par in proc!&gt;&gt;ByVal &lt;&lt;!par.replace("@","")!&gt;&gt; As &lt;&lt;!if par.vbtype = "Integer" or par.vbtype = "Boolean" or par.vbtype = "Decimal" or par.vbtype = "Double" or par.vbtype = "Date" or par.vbtype = "DateTime"!&gt;&gt;Global.System.Nullable(Of &lt;&lt;!par.vbtype!&gt;&gt;)&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.vbtype!&gt;&gt;&lt;&lt;!end!&gt;&gt;&lt;&lt;!if par.listpos &lt; par.listcount!&gt;&gt;, &lt;&lt;!end!&gt;&gt;&lt;&lt;!end!&gt;&gt;) As Integer
+        Public Overridable Overloads Function Fill(ByVal dataTable As QueriesAdaptor.&lt;&lt;!proc!&gt;&gt;DataTable&lt;&lt;!if proc.paramcount &gt; 0!&gt;&gt;, &lt;&lt;!for param par in proc!&gt;&gt;ByVal &lt;&lt;!par.replace("@","")!&gt;&gt; As &lt;&lt;!if par.vbtype = "Integer" or par.vbtype = "Boolean" or par.vbtype = "Decimal" or par.vbtype = "Double" or par.vbtype = "Date" or par.vbtype = "DateTime"!&gt;&gt;Global.System.Nullable(Of &lt;&lt;!par.vbtype!&gt;&gt;)&lt;&lt;!else!&gt;&gt;&lt;&lt;!par.vbtype!&gt;&gt;&lt;&lt;!end!&gt;&gt;&lt;&lt;!if par.listpos &lt; par.listcount!&gt;&gt;, &lt;&lt;!end; end; end!&gt;&gt;) As Integer
             Me.Adapter.SelectCommand = Me.CommandCollection(0)
 &lt;&lt;!for param par in proc!&gt;&gt;
 &lt;&lt;!if par.vbtype = "Integer" or par.vbtype = "Boolean" or par.vbtype = "Decimal" or par.vbtype = "Double" or par.vbtype = "Date" or par.vbtype = "DateTime"!&gt;&gt;
@@ -1324,7 +1326,7 @@ Namespace QueriesAdaptorTableAdapters
             Me._commandCollection = New Global.System.Data.IDbCommand(&lt;&lt;!noquerycount!&gt;&gt;) {}
         &lt;&lt;!end!&gt;&gt;
             Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;) = New Global.System.Data.SqlClient.SqlCommand
-            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Connection = New Global.System.Data.SqlClient.SqlConnection(Global.Test.My.MySettings.Default.JanusConnectionString)
+            CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).Connection = New Global.System.Data.SqlClient.SqlConnection(&lt;&lt;!connstrvar!&gt;&gt;)
             CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).CommandText = "dbo.&lt;&lt;!proc!&gt;&gt;"
             CType(Me._commandCollection(&lt;&lt;!ProcCount!&gt;&gt;), Global.System.Data.SqlClient.SqlCommand).CommandType = Global.System.Data.CommandType.StoredProcedure
         &lt;&lt;!for param prm in proc!&gt;&gt;
