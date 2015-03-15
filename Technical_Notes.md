@@ -1,0 +1,24 @@
+Notes about this source code
+
+
+# Introduction #
+
+Metadrone itself is a closed source application, however these components are open and publicly accessible for open source licensing reasons.
+
+Metadrone and its components require .Net framework 3.5. The IDE used is Visual Studio 2008.
+
+
+# Details #
+
+**ICSharpCode.TextEditor**
+
+A derived work from the ICSharpCode text editor component of the SharpDevelop project. This component has been modified for use with Metadrone.
+
+
+**SourcePlugins**
+
+These plugins are for databases that are not natively supported by the .Net framework (such as SQL Server for instance).
+
+Most database vendors provide libraries under the LGPL license, however the MySql library (mysql.data.dll) is under the GPL license and therefore any component making use of these assemblies must be open source.
+
+You can refer to this code to create your own plugins for additional database support.
