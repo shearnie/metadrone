@@ -1,6 +1,0 @@
-﻿Firebird (FirebirdSQL) source provider plugin for Metadrone.
-
-ADO.NET data provider download: http://www.firebirdsql.org/
-
-Related assemblies:
-  FirebirdSql.Data.FirebirdClient.dll

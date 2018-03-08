@@ -1,6 +1,0 @@
-﻿MySQL source provider plugin for Metadrone.
-
-ADO.NET data provider download: http://dev.mysql.com/
-
-Related assemblies:
-  mysql.data.dll
